@@ -22,6 +22,9 @@ pub struct Rom {
     pub name: Option<String>,
     /// The file or folder name, without extension.
     pub fs_name_no_ext: String,
+    /// Where RomM keeps the ROM: its file, or its folder when it has
+    /// several files.
+    pub full_path: String,
     /// RomM's platform slug (`snes`, `n64`, …).
     pub platform_slug: String,
     pub platform_display_name: String,
@@ -45,6 +48,24 @@ impl Rom {
             .filter(|n| !n.is_empty())
             .unwrap_or(&self.fs_name_no_ext)
     }
+
+    /// The files that make up the game itself, without manuals, patches,
+    /// DLC and the other extras RomM keeps beside it.
+    pub fn game_files(&self) -> impl Iterator<Item = &RomFile> {
+        self.files.iter().filter(|f| f.is_game())
+    }
+
+    /// Where `file` sits inside the ROM's folder (`/`-separated), as RomM
+    /// names it in downloads: its name, or its path below the folder of a
+    /// ROM with several files.
+    pub fn path_in_rom<'a>(&self, file: &'a RomFile) -> &'a str {
+        let folder = self.full_path.trim_end_matches('/');
+        file.full_path
+            .strip_prefix(folder)
+            .and_then(|rest| rest.strip_prefix('/'))
+            .filter(|rest| !folder.is_empty() && !rest.is_empty())
+            .unwrap_or(&file.file_name)
+    }
 }
 
 /// One file of a ROM.
@@ -54,12 +75,22 @@ pub struct RomFile {
     pub id: u64,
     pub file_name: String,
     pub file_size_bytes: u64,
+    /// The file's path on the server, below RomM's library folder.
+    pub full_path: String,
     pub updated_at: String,
     pub sha1_hash: Option<String>,
     pub md5_hash: Option<String>,
+    /// What the file is to the game (`game`, `manual`, `patch`, `dlc`, …).
+    /// RomM leaves it out for the game's own files below the ROM's folder.
+    pub category: Option<String>,
 }
 
 impl RomFile {
+    /// Whether the file is part of the game itself.
+    pub fn is_game(&self) -> bool {
+        self.category.as_deref().is_none_or(|c| c == "game")
+    }
+
     /// The file's extension, lower case, without the dot.
     pub fn extension(&self) -> String {
         std::path::Path::new(&self.file_name)
@@ -114,5 +145,22 @@ mod tests {
             ..file.clone()
         };
         assert_eq!(hashed.revision(), "40:3145728:abc");
+        assert_eq!(rom.path_in_rom(file), "Super Metroid (Japan, USA).SFC");
+    }
+
+    #[test]
+    fn places_the_files_of_a_rom_folder() {
+        let rom: Rom = serde_json::from_value(serde_json::json!({
+            "id": 3,
+            "full_path": "roms/dos/Doom",
+            "files": [
+                {"id": 1, "file_name": "DOOM.EXE", "full_path": "roms/dos/Doom/DOOM.EXE", "category": "game"},
+                {"id": 2, "file_name": "DOOM1.WAD", "full_path": "roms/dos/Doom/DATA/DOOM1.WAD"},
+                {"id": 3, "file_name": "manual.pdf", "full_path": "roms/dos/Doom/manual/manual.pdf", "category": "manual"}
+            ]
+        }))
+        .unwrap();
+        let placed: Vec<&str> = rom.game_files().map(|f| rom.path_in_rom(f)).collect();
+        assert_eq!(placed, ["DOOM.EXE", "DATA/DOOM1.WAD"]);
     }
 }

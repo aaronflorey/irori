@@ -7,7 +7,7 @@
 //! file's header when several do (`.iso`, `.bin`).
 
 use std::io::Read as _;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context as _, Result};
 use once_cell::sync::Lazy;
@@ -292,6 +292,77 @@ pub fn title_of_param_json(text: &str) -> Option<String> {
         .or_else(|| langs.values().filter(|v| v.is_object()).find_map(title_in))
 }
 
+/// The program that starts the DOS game in `folder`: its DOSBox config if it
+/// has one, else the one program that isn't an installer, preferring one
+/// named like the folder.
+pub fn dos_program(folder: &Path) -> Option<PathBuf> {
+    fn programs(dir: &Path) -> Vec<PathBuf> {
+        let mut out: Vec<PathBuf> = std::fs::read_dir(dir)
+            .map(|r| r.flatten().map(|e| e.path()).collect())
+            .unwrap_or_default();
+        out.sort();
+        out
+    }
+    let top = programs(folder);
+    if let Some(conf) = top.iter().find(|p| extension(p).as_deref() == Some("conf")) {
+        return Some(conf.clone());
+    }
+    let wanted = folder
+        .file_name()
+        .map(|n| n.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
+    let pick = |list: &[PathBuf]| -> Option<PathBuf> {
+        let runnable: Vec<&PathBuf> = list
+            .iter()
+            .filter(|p| is_dos_program(p) && !is_dos_helper(p))
+            .collect();
+        runnable
+            .iter()
+            .find(|p| {
+                let s = stem_of(p).to_lowercase();
+                !s.is_empty() && (wanted.starts_with(&s) || s.starts_with(&wanted))
+            })
+            .or_else(|| {
+                runnable
+                    .iter()
+                    .find(|p| extension(p).as_deref() != Some("bat"))
+            })
+            .or(runnable.first())
+            .map(|p| (*p).clone())
+    };
+    pick(&top).or_else(|| {
+        top.iter()
+            .filter(|p| p.is_dir())
+            .find_map(|sub| pick(&programs(sub)))
+    })
+}
+
+/// Whether `path` is a program DOSBox runs.
+pub fn is_dos_program(path: &Path) -> bool {
+    matches!(extension(path).as_deref(), Some("exe" | "com" | "bat"))
+}
+
+/// Programs that set a DOS game up rather than start it.
+fn is_dos_helper(path: &Path) -> bool {
+    let stem = stem_of(path).to_lowercase();
+    [
+        "setup", "install", "config", "uninst", "readme", "setsound", "sound",
+    ]
+    .iter()
+    .any(|w| stem.starts_with(w))
+}
+
+fn extension(path: &Path) -> Option<String> {
+    path.extension()
+        .map(|e| e.to_string_lossy().to_ascii_lowercase())
+}
+
+fn stem_of(path: &Path) -> String {
+    path.file_stem()
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_default()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -442,5 +513,27 @@ mod tests {
         std::fs::write(&unknown_iso, [0u8; 64]).unwrap();
         assert_eq!(detect(&unknown_iso, by_folder("psp")).unwrap().id, "psp");
         assert!(detect(&unknown_iso, None).is_none());
+    }
+
+    #[test]
+    fn picks_dos_programs() {
+        let dir = tempfile::tempdir().unwrap();
+        let game = dir.path().join("Doom");
+        touch_file(&game.join("INSTALL.EXE"), b"MZ");
+        touch_file(&game.join("DOOM.EXE"), b"MZ");
+        touch_file(&game.join("GO.BAT"), b"x");
+        assert!(dos_program(&game).unwrap().ends_with("DOOM.EXE"));
+        let conf = dir.path().join("Quake");
+        touch_file(&conf.join("QUAKE.EXE"), b"MZ");
+        touch_file(&conf.join("dosbox.conf"), b"[autoexec]");
+        assert!(dos_program(&conf).unwrap().ends_with("dosbox.conf"));
+        let nested = dir.path().join("Duke");
+        touch_file(&nested.join("DUKE3D/DUKE3D.EXE"), b"MZ");
+        assert!(dos_program(&nested).unwrap().ends_with("DUKE3D/DUKE3D.EXE"));
+    }
+
+    fn touch_file(path: &Path, bytes: &[u8]) {
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(path, bytes).unwrap();
     }
 }

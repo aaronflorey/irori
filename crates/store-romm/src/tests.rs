@@ -29,7 +29,7 @@ fn rom_json(server: &Server) -> serde_json::Value {
             "path_cover_large": "/assets/romm/resources/roms/1/7/cover/big.png?ts=1",
             "regions": ["USA"],
             "files": [
-                {"id": 70, "file_name": "manual.pdf", "file_size_bytes": 3},
+                {"id": 70, "file_name": "manual.pdf", "file_size_bytes": 3, "category": "manual"},
                 {
                     "id": 71,
                     "file_name": "Super Metroid (Japan, USA).sfc",
@@ -45,8 +45,58 @@ fn rom_json(server: &Server) -> serde_json::Value {
             "platform_slug": "n64",
             "platform_display_name": "Nintendo 64",
             "files": [{"id": 80, "file_name": "Super Mario 64 (USA).z64", "file_size_bytes": 8}]
+        },
+        {
+            "id": 9,
+            "name": "Panzer Dragoon",
+            "fs_name_no_ext": "Panzer Dragoon (USA)",
+            "platform_slug": "saturn",
+            "platform_display_name": "Sega Saturn",
+            "files": [{"id": 90, "file_name": "Panzer Dragoon (USA).chd", "file_size_bytes": 8}]
+        },
+        {
+            "id": 10,
+            "name": "Final Fantasy VII",
+            "fs_name_no_ext": "Final Fantasy VII (USA)",
+            "full_path": "roms/psx/Final Fantasy VII (USA)",
+            "platform_slug": "psx",
+            "platform_display_name": "PlayStation",
+            "files": [
+                file_json(100, "roms/psx/Final Fantasy VII (USA)", "FF7.cue", None),
+                file_json(101, "roms/psx/Final Fantasy VII (USA)", "FF7 (Track 1).bin", None),
+                file_json(102, "roms/psx/Final Fantasy VII (USA)/manual", "Manual.pdf", Some("manual")),
+            ]
+        },
+        {
+            "id": 11,
+            "name": "Doom",
+            "fs_name_no_ext": "Doom",
+            "full_path": "roms/dos/Doom",
+            "platform_slug": "dos",
+            "platform_display_name": "DOS",
+            "files": [
+                file_json(110, "roms/dos/Doom", "INSTALL.EXE", Some("game")),
+                file_json(111, "roms/dos/Doom", "DOOM.EXE", Some("game")),
+                file_json(112, "roms/dos/Doom/DATA", "DOOM1.WAD", None),
+            ]
         }
     ])
+}
+
+/// The bytes RomM serves for the file with `id` of the disc and folder
+/// games.
+fn file_bytes(id: u64) -> Vec<u8> {
+    format!("file {id}").into_bytes()
+}
+
+fn file_json(id: u64, folder: &str, name: &str, category: Option<&str>) -> serde_json::Value {
+    json!({
+        "id": id,
+        "file_name": name,
+        "full_path": format!("{folder}/{name}"),
+        "file_size_bytes": file_bytes(id).len(),
+        "category": category,
+    })
 }
 
 fn start_server() -> (TestServer, Arc<Server>) {
@@ -71,6 +121,11 @@ fn start_server() -> (TestServer, Arc<Server>) {
             Resp::json(json!({"items": rom_json(&s)}))
         } else if path.starts_with("/api/roms/7/content/") && path.ends_with("?file_ids=71") {
             serve_bytes(req, &s.rom_bytes.lock(), true)
+        } else if let Some((_, id)) = path
+            .split_once("/content/")
+            .and_then(|(_, rest)| rest.split_once("?file_ids="))
+        {
+            serve_bytes(req, &file_bytes(id.parse().unwrap()), true)
         } else {
             Resp::status(404)
         }
@@ -121,13 +176,14 @@ async fn install(s: &RommStore, app: &str) -> Outcome {
 }
 
 #[tokio::test]
-async fn lists_every_rom_and_downloads_only_snes_games() {
+async fn lists_the_roms_of_systems_irori_plays() {
     let (server, _) = start_server();
     let dir = test_dir();
     let s = signed_in(dir.path(), &server).await;
 
     let games = s.games();
-    assert_eq!(games.len(), 2);
+    assert_eq!(games.len(), 4);
+    assert!(s.game("9").is_none(), "Saturn games aren't playable yet");
     let metroid = s.game("7").unwrap();
     assert_eq!(metroid.title, "Super Metroid");
     assert_eq!(metroid.system.as_deref(), Some("snes"));
@@ -147,16 +203,8 @@ async fn lists_every_rom_and_downloads_only_snes_games() {
         Some(format!("{}/rom/7", server.base()).as_str())
     );
     let mario = s.game("8").unwrap();
-    assert!(!mario.installable);
-    let err = s
-        .install_info("8", InstallPlatform::Linux, &InstallInfoQuery::default())
-        .await
-        .unwrap_err();
-    assert_eq!(
-        err.to_string(),
-        "Irori can't play Nintendo 64 games from RomM yet"
-    );
-    assert!(matches!(install(&s, "8").await, Outcome::Error(_)));
+    assert_eq!(mario.system.as_deref(), Some("n64"));
+    assert!(mario.installable);
 
     let info = s
         .install_info("7", InstallPlatform::Linux, &InstallInfoQuery::default())
@@ -216,7 +264,7 @@ async fn offers_and_applies_updates_when_the_file_changes() {
     // Everything survives a restart.
     let again = store(dir.path());
     again.init().await.unwrap();
-    assert_eq!(again.games().len(), 2);
+    assert_eq!(again.games().len(), 4);
     assert!(again.game("7").unwrap().is_installed);
 
     let install_dir = PathBuf::from(&record.install_path);
@@ -251,6 +299,41 @@ async fn a_revoked_token_asks_to_sign_in_again() {
     );
 }
 
+#[tokio::test]
+async fn downloads_every_file_of_disc_and_folder_games() {
+    let (server, _) = start_server();
+    let dir = test_dir();
+    let s = signed_in(dir.path(), &server).await;
+
+    let info = s
+        .install_info("10", InstallPlatform::Linux, &InstallInfoQuery::default())
+        .await
+        .unwrap();
+    assert_eq!(info.download_size, 2 * file_bytes(100).len() as u64);
+    assert!(matches!(install(&s, "10").await, Outcome::Done));
+    let ff7 = dir.path().join("Games/Final Fantasy VII (USA)");
+    assert_eq!(
+        std::fs::read(ff7.join("FF7 (Track 1).bin")).unwrap(),
+        file_bytes(101)
+    );
+    assert!(!ff7.join("manual").exists(), "extras stay on the server");
+    assert_eq!(
+        s.game("10").unwrap().install.as_ref().unwrap().executable,
+        ff7.join("FF7.cue").display().to_string()
+    );
+
+    assert!(matches!(install(&s, "11").await, Outcome::Done));
+    let doom = dir.path().join("Games/Doom");
+    assert_eq!(
+        std::fs::read(doom.join("DATA/DOOM1.WAD")).unwrap(),
+        file_bytes(112)
+    );
+    let record = s.record("11").unwrap();
+    assert_eq!(record.path(), doom.join("DOOM.EXE"));
+    assert_eq!(record.files, ["DATA/DOOM1.WAD", "DOOM.EXE", "INSTALL.EXE"]);
+    assert!(s.updatable_games().await.unwrap().is_empty());
+}
+
 #[test]
 fn picks_the_file_an_emulator_plays() {
     let file = |id, name: &str| RomFile {
@@ -258,25 +341,39 @@ fn picks_the_file_an_emulator_plays() {
         file_name: name.into(),
         ..Default::default()
     };
-    let rom = Rom {
-        files: vec![
-            file(1, "readme.txt"),
-            file(2, "Game.zip"),
-            file(3, "Game.SMC"),
+    let rom = |slug: &str, files| Rom {
+        platform_slug: slug.into(),
+        files,
+        ..Default::default()
+    };
+    let main = |rom: &Rom| match download_plan(rom)?.main {
+        Main::File(place) => Some(place),
+        _ => None,
+    };
+    let snes = rom(
+        "snes",
+        vec![
+            file(1, "Game.zip"),
+            file(2, "Game.SMC"),
+            file(3, "readme.txt"),
         ],
-        ..Default::default()
-    };
-    assert_eq!(playable_file(&rom, "snes").map(|f| f.id), Some(3));
-    let zipped = Rom {
-        files: vec![file(1, "readme.txt"), file(2, "Game.zip")],
-        ..Default::default()
-    };
-    assert_eq!(playable_file(&zipped, "snes").map(|f| f.id), Some(2));
-    let none = Rom {
-        files: vec![file(1, "readme.txt")],
-        ..Default::default()
-    };
-    assert!(playable_file(&none, "snes").is_none());
-    assert_eq!(system_of("sfam"), Some("snes"));
-    assert_eq!(system_of("n64"), None);
+    );
+    assert_eq!(main(&snes).as_deref(), Some("Game.SMC"));
+    // RetroArch opens zipped cartridges; DuckStation doesn't open zips.
+    let zipped = rom("sfam", vec![file(1, "readme.txt"), file(2, "Game.zip")]);
+    assert_eq!(main(&zipped).as_deref(), Some("Game.zip"));
+    assert!(download_plan(&rom("psx", vec![file(1, "Game.zip")])).is_none());
+    // A playlist opens before any of its discs.
+    let discs = rom(
+        "psx",
+        vec![
+            file(1, "Disc 1.cue"),
+            file(2, "Disc 2.cue"),
+            file(3, "Game.m3u"),
+        ],
+    );
+    assert_eq!(main(&discs).as_deref(), Some("Game.m3u"));
+    assert!(download_plan(&rom("snes", vec![file(1, "readme.txt")])).is_none());
+    assert_eq!(system_of("genesis"), Some("genesis"));
+    assert_eq!(system_of("saturn"), None);
 }

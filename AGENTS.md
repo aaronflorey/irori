@@ -168,7 +168,7 @@ Directory names and package names differ. Use the package name with `-p`.
 | `crates/store-amazon` | `irori-amazon` | Amazon `Store` (`Runner::Nile`) |
 | `crates/store-zoom` | `irori-zoom` | ZOOM Platform `Store`, opt-in through a setting |
 | `crates/store-itch` | `irori-itch` | itch.io `Store` (`Runner::Itch`), opt-in through `iroriItchIo` |
-| `crates/store-romm` | `irori-romm` | RomM `Store` (`Runner::Romm`): the server's ROMs, downloaded and played with emulators (Super Nintendo only for now) |
+| `crates/store-romm` | `irori-romm` | RomM `Store` (`Runner::Romm`): the server's ROMs of the systems Irori emulates, downloaded and played with emulators |
 | `crates/msstore` | `irori-msstore-api` | Microsoft Store and Xbox Live protocol (port of Xodus): device registration, RST2 with XML-DSig, CLEP and SPLicense secrets, SISU and XSTS, the display catalog and Store browsing, package plans, content licences and offline leases, entitlements, Game Pass, offline PC |
 | `crates/msixvc` | `irori-msixvc` | MSIXVC packages (port of Xodus): XVD and its NTFS volume, AES-XTS, hash tree, streaming downloads with resume checkpoints |
 | `crates/store-xbox` | `irori-xbox` | Xbox `Store` (`Runner::Xbox`, Linux), opt-in through `iroriXbox`: Microsoft Store and PC Game Pass installs, licensed launches through a decrypted launch view, the in-game account service |
@@ -1247,12 +1247,16 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   `/pair/device` page in the browser and polls until RomM issues a client API token
   (`rmm_…`, scopes `me.read roms.read platforms.read`), kept with `irori_secrets`; the
   device id in `<config>/device-id` keeps one entry in RomM's device list per
-  installation. Every ROM the account sees is listed (cached for offline); only systems
-  `irori_romm::system_of` maps can be downloaded, Super Nintendo for now. A download is
-  one file of the ROM (the system's extension, else a zip, which RetroArch reads) through
-  `irori-depot`, verified by RomM's SHA-1 when it has one, into
-  `<install folder>/<RomM file name>/`; an update is offered when that file's id, size or
-  hash changes. Launching is the ROM library's (`irori_engines::play::launch_plan`).
+  installation. Every ROM the account sees is cached for offline; only those of RomM
+  platforms `irori_romm::system_of` maps to a system (RomM's universal slugs) are listed.
+  A download is the ROM's game files (not the files RomM files as manuals, patches, DLC
+  and other extras) through `irori-depot`, laid out as in the ROM's folder on the server,
+  verified by RomM's SHA-1 when it has one, into `<install folder>/<RomM file name>/`.
+  The emulator opens a playlist, else the first file with one of the system's
+  extensions (in the catalog's order), else a zip when RetroArch is the system's default;
+  PlayStation 3–5 folders their `folderMain` program, DOS folders
+  `irori_engines::systems::dos_program`, ScummVM the folder. An update is offered when
+  any file's id, size or hash changes. Launching is the ROM library's (`irori_engines::play::launch_plan`).
   Covers come from the server's `/assets/romm/resources/`, which RomM serves without
   sign-in.
 - **Fix dialogs.** `irori_ui::save_conflict::resolve_launch_error` also turns

@@ -37,8 +37,9 @@ use irori_engines::systems;
 use parking_lot::{Mutex, RwLock};
 use serde::{Deserialize, Serialize};
 
+pub use irori_engines::systems::dos_program;
 pub use names::{RomName, parse as parse_name};
-pub use scan::{RomEntry, dos_program};
+pub use scan::RomEntry;
 
 /// How long the watcher waits for a burst of changes to settle.
 const SETTLE: Duration = Duration::from_secs(2);
@@ -162,7 +163,7 @@ impl EmulationStore {
         };
         let main = if meta.is_dir() && system.id == "dos" {
             let dir = path.to_path_buf();
-            tokio::task::spawn_blocking(move || scan::dos_program(&dir))
+            tokio::task::spawn_blocking(move || dos_program(&dir))
                 .await
                 .context("looking for the program stopped")?
                 .with_context(|| format!("{} holds no DOS program", path.display()))?

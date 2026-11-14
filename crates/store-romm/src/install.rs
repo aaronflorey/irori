@@ -1,6 +1,6 @@
-//! Download, update and repair: the ROM's playable file downloads through
+//! Download, update and repair: the ROM's game files download through
 //! [`irori_depot`] into `<base>/.romm-download/<app>/` (resumable), then
-//! moves into the game's folder, replacing the previous file only once the
+//! move into the game's folder, replacing the previous files only once every
 //! new one is complete.
 
 use std::path::{Path, PathBuf};
@@ -10,7 +10,7 @@ use anyhow::{Context as _, Result, bail};
 use irori_core::{InstallProgress, OpContext, Outcome, util};
 
 use crate::records::InstalledRecord;
-use crate::{RommStore, session_error};
+use crate::{RommStore, main_on_disk, session_error};
 
 fn progress_sink(ctx: &OpContext) -> irori_depot::ProgressFn {
     let sink = ctx.progress.clone();
@@ -82,9 +82,8 @@ impl RommStore {
     }
 
     async fn pipeline(&self, app: &str, install_dir: &Path, ctx: &OpContext) -> Result<Outcome> {
-        let (rom, system, file) = self.download_of(app)?;
+        let (rom, download) = self.download_of(app)?;
         let previous = self.record(app);
-        let name = irori_core::paths::sanitize(&file.file_name);
         if previous.is_none()
             && std::fs::read_dir(install_dir).is_ok_and(|mut d| d.next().is_some())
         {
@@ -97,13 +96,14 @@ impl RommStore {
             .parent()
             .context("invalid install folder")?
             .to_path_buf();
+        let size = download.size();
         if let Some(free) = free_space(&base)
-            && free < file.file_size_bytes
+            && free < size
         {
             bail!(
                 "Not enough free disk space in {}: {} needed, {} available",
                 base.display(),
-                util::format_bytes(file.file_size_bytes),
+                util::format_bytes(size),
                 util::format_bytes(free)
             );
         }
@@ -113,25 +113,40 @@ impl RommStore {
             .with_context(|| format!("creating {}", staging.display()))?;
 
         (ctx.step)("Downloading");
-        log_line(ctx, &format!("downloading {} ({name})", rom.title()));
-        let api = self.api()?;
-        let hash = file
-            .sha1_hash
-            .as_deref()
-            .filter(|h| h.len() == 40)
-            .and_then(|h| irori_depot::Digest::from_hex(irori_depot::Algorithm::Sha1, h).ok());
-        let entry = irori_depot::FileEntry::whole(
-            irori_depot::path::normalize(&name)?,
-            file.file_size_bytes,
-            hash,
-            vec![api.download_url(rom.id, &file)],
+        log_line(
+            ctx,
+            &format!(
+                "downloading {} ({} files)",
+                rom.title(),
+                download.files.len()
+            ),
         );
+        let api = self.api()?;
+        let entries: Vec<irori_depot::FileEntry> = download
+            .files
+            .iter()
+            .map(|(place, file)| {
+                let hash = file
+                    .sha1_hash
+                    .as_deref()
+                    .filter(|h| h.len() == 40)
+                    .and_then(|h| {
+                        irori_depot::Digest::from_hex(irori_depot::Algorithm::Sha1, h).ok()
+                    });
+                irori_depot::FileEntry::whole(
+                    place.clone(),
+                    file.file_size_bytes,
+                    hash,
+                    vec![api.download_url(rom.id, file)],
+                )
+            })
+            .collect();
         let settings = (self.settings)();
         let finished = irori_depot::download(
             &api.download_client()?,
             irori_depot::Job {
                 root: &staging,
-                files: std::slice::from_ref(&entry),
+                files: &entries,
                 remove: &[],
             },
             &irori_depot::Options {
@@ -151,24 +166,32 @@ impl RommStore {
         tokio::fs::create_dir_all(install_dir)
             .await
             .with_context(|| format!("creating {}", install_dir.display()))?;
-        let target = install_dir.join(&name);
-        tokio::fs::rename(staging.join(&name), &target)
-            .await
-            .with_context(|| format!("moving the ROM to {}", target.display()))?;
-        // RomM may now serve the game under another file name.
-        if let Some(old) = &previous
-            && old.file != name
-        {
-            let _ = tokio::fs::remove_file(old.path()).await;
+        for (place, _) in &download.files {
+            let target = irori_depot::path::join(install_dir, place);
+            if let Some(parent) = target.parent() {
+                tokio::fs::create_dir_all(parent)
+                    .await
+                    .with_context(|| format!("creating {}", parent.display()))?;
+            }
+            tokio::fs::rename(irori_depot::path::join(&staging, place), &target)
+                .await
+                .with_context(|| format!("moving {place} to {}", target.display()))?;
+        }
+        // RomM may now serve the game under other file names.
+        let places: Vec<String> = download.files.iter().map(|(p, _)| p.clone()).collect();
+        if let Some(old) = &previous {
+            for gone in old.files().iter().filter(|p| !places.contains(p)) {
+                let _ = tokio::fs::remove_file(irori_depot::path::join(install_dir, gone)).await;
+            }
         }
         let record = InstalledRecord {
             title: rom.title().to_string(),
             install_path: install_dir.to_string_lossy().into_owned(),
-            file: name,
-            system: system.to_string(),
-            file_id: file.id,
-            revision: file.revision(),
-            size: file.file_size_bytes,
+            file: main_on_disk(&download.main, install_dir).await?,
+            files: places,
+            system: download.system.id.clone(),
+            revision: download.revision(),
+            size,
             pinned_version: previous.is_some_and(|p| p.pinned_version),
         };
         self.update_installed(|m| {

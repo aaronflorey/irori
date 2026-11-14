@@ -5,11 +5,12 @@
 //!   approves Irori on RomM's page in the browser, and the client API token
 //!   RomM issues is kept with `irori_secrets` in `auth.json`.
 //! * Library: every ROM the account sees, cached in `library.json` so the
-//!   library shows offline. Only systems Irori plays from RomM
-//!   ([`system_of`], Super Nintendo for now) can be downloaded.
-//! * Install, update and repair: the ROM's playable file downloads through
-//!   [`irori_depot`] (resumable, speed-limited) into a folder of its own. An
-//!   update is offered when RomM's file changes (another file, size or hash).
+//!   library shows offline. ROMs of platforms Irori doesn't play
+//!   ([`system_of`]) aren't listed.
+//! * Install, update and repair: the ROM's game files (not its manuals,
+//!   patches or other extras) download through [`irori_depot`] (resumable,
+//!   speed-limited) into a folder of their own, laid out as on the server.
+//!   An update is offered when RomM's files change (others, size or hash).
 //! * Launch: the file with its emulator, as the ROM library plays its games
 //!   ([`irori_engines::play`]).
 
@@ -31,6 +32,7 @@ use irori_core::{
     Paths, RemoveArgs, Runner, SessionExpired, SettingsFn, Store, UpdateRequest, UserInfo,
 };
 use irori_engines::GameFile;
+use irori_engines::systems::{self, System};
 use irori_romm_api::{ApiError, Client, Rom, RomFile};
 use parking_lot::RwLock;
 use url::Url;
@@ -43,35 +45,142 @@ pub fn import_from_heroic(_heroic_config_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Irori's system for a RomM platform slug, when Irori plays its games from
-/// RomM.
+/// Irori's system for a RomM platform slug (RomM's universal slugs), when
+/// Irori plays that platform's games. ROMs of other platforms aren't listed.
 pub fn system_of(platform_slug: &str) -> Option<&'static str> {
-    match platform_slug {
-        "snes" | "sfam" => Some("snes"),
-        _ => None,
+    Some(match platform_slug {
+        "nes" | "famicom" | "fds" => "nes",
+        "snes" | "sfam" | "satellaview" => "snes",
+        "n64" => "n64",
+        "gb" => "gb",
+        "gbc" => "gbc",
+        "gba" => "gba",
+        "nds" | "nintendo-dsi" => "nds",
+        "3ds" | "new-nintendo-3ds" => "3ds",
+        "ngc" => "gamecube",
+        "wii" => "wii",
+        "wiiu" => "wiiu",
+        "sms" => "sms",
+        "genesis" => "genesis",
+        "gamegear" => "gamegear",
+        "segacd" => "segacd",
+        "tg16" | "supergrafx" => "pce",
+        "psx" => "psx",
+        "psp" => "psp",
+        "ps2" => "ps2",
+        "ps3" => "ps3",
+        "ps4" => "ps4",
+        "ps5" => "ps5",
+        "xbox" => "xbox",
+        "dos" => "dos",
+        "scummvm" => "scummvm",
+        "arcade" | "mame" => "arcade",
+        _ => return None,
+    })
+}
+
+/// What downloading a ROM fetches, and what its emulator opens.
+pub(crate) struct Download {
+    pub system: &'static System,
+    /// The game's files with their place in its folder (`/`-separated,
+    /// sorted).
+    pub files: Vec<(String, RomFile)>,
+    pub main: Main,
+}
+
+pub(crate) enum Main {
+    /// This file of the game's folder.
+    File(String),
+    /// The game's folder itself (ScummVM finds the game there).
+    Folder,
+    /// The DOS program, picked once the files are on disk
+    /// ([`systems::dos_program`]).
+    DosProgram,
+}
+
+impl Download {
+    /// Changes whenever RomM serves different files for the game. A ROM of
+    /// one file keeps that file's own revision.
+    pub fn revision(&self) -> String {
+        let parts: Vec<String> = self.files.iter().map(|(_, f)| f.revision()).collect();
+        parts.join(";")
+    }
+
+    pub fn size(&self) -> u64 {
+        self.files.iter().map(|(_, f)| f.file_size_bytes).sum()
     }
 }
 
-/// The file of `rom` an emulator plays: one with the system's extension,
-/// else a zip (RetroArch reads zipped cartridges itself).
-pub fn playable_file<'a>(rom: &'a Rom, system: &str) -> Option<&'a RomFile> {
-    let system = irori_engines::systems::get(system)?;
-    let plain = rom
-        .files
-        .iter()
-        .find(|f| system.extensions.contains(&f.extension()));
-    plain.or_else(|| rom.files.iter().find(|f| f.extension() == "zip"))
+/// The download of `rom`, when Irori can play its system and finds the
+/// file to open among its game files.
+pub(crate) fn download_plan(rom: &Rom) -> Option<Download> {
+    let system = systems::get(system_of(&rom.platform_slug)?)?;
+    let mut files = Vec::new();
+    for file in rom.game_files() {
+        // Names are sanitized per folder, as the ROM library's folders would
+        // hold them; anything that still leaves the folder drops the ROM.
+        let place: Vec<String> = rom
+            .path_in_rom(file)
+            .split(['/', '\\'])
+            .filter(|part| !part.is_empty())
+            .map(irori_core::paths::sanitize)
+            .collect();
+        let place = irori_depot::path::normalize(&place.join("/")).ok()?;
+        files.push((place, file.clone()));
+    }
+    files.sort_by(|a, b| a.0.cmp(&b.0));
+    let main = main_file(system, &files)?;
+    Some(Download {
+        system,
+        files,
+        main,
+    })
 }
 
-/// Why a ROM can't be downloaded, in plain words.
-fn not_playable(rom: &Rom) -> String {
-    match system_of(&rom.platform_slug) {
-        Some(_) => format!("{} has no file Irori can play", rom.title()),
-        None => format!(
-            "Irori can't play {} games from RomM yet",
-            nonempty(&rom.platform_display_name).unwrap_or(&rom.platform_slug)
-        ),
+fn main_file(system: &System, files: &[(String, RomFile)]) -> Option<Main> {
+    let ext = |place: &str| {
+        Path::new(place)
+            .extension()
+            .map(|e| e.to_string_lossy().to_ascii_lowercase())
+            .unwrap_or_default()
+    };
+    let with = |wanted: &str| {
+        files
+            .iter()
+            .find(|(place, _)| ext(place) == wanted)
+            .map(|(place, _)| Main::File(place.clone()))
+    };
+    if system.id == "dos" {
+        let runnable = files
+            .iter()
+            .any(|(place, _)| ext(place) == "conf" || systems::is_dos_program(Path::new(place)));
+        return runnable.then_some(Main::DosProgram);
     }
+    // PlayStation 3, 4 and 5 folders open at their program.
+    let program = files.iter().find(|(place, _)| {
+        let place = place.to_ascii_lowercase();
+        system.folder_main.iter().any(|rel| {
+            let rel = rel.to_ascii_lowercase();
+            place == rel || place.ends_with(&format!("/{rel}"))
+        })
+    });
+    if let Some((place, _)) = program {
+        return Some(Main::File(place.clone()));
+    }
+    // A playlist holds every disc, so it opens before any one of them.
+    let order = std::iter::once("m3u").chain(system.extensions.iter().map(String::as_str));
+    if let Some(main) = order.filter(|e| system.has_extension(e)).find_map(with) {
+        return Some(main);
+    }
+    if system.folder_games {
+        return (!files.is_empty()).then_some(Main::Folder);
+    }
+    // RetroArch reads zipped cartridges itself; other emulators don't.
+    let retroarch = system
+        .engines
+        .first()
+        .is_some_and(|e| e.starts_with("retroarch:"));
+    retroarch.then(|| with("zip")).flatten()
 }
 
 fn nonempty(s: &str) -> Option<&str> {
@@ -117,7 +226,7 @@ impl State {
 
 fn game_info(rom: &Rom, server: Option<&Url>, installed: Option<&InstalledRecord>) -> GameInfo {
     let native = HostPlatform::current().native();
-    let system = system_of(&rom.platform_slug);
+    let download = download_plan(rom);
     let on_server =
         |path: &str| server.map(|s| format!("{}{path}", s.as_str().trim_end_matches('/')));
     let cover = rom
@@ -144,12 +253,12 @@ fn game_info(rom: &Rom, server: Option<&Url>, installed: Option<&InstalledRecord
         art_cover: cover,
         is_installed: installed.is_some(),
         install: installed.map(InstalledRecord::to_installed_info),
-        installable: system.is_some_and(|s| playable_file(rom, s).is_some()),
+        installable: download.is_some(),
         can_run_offline: true,
         is_linux_native: native == InstallPlatform::Linux,
         is_mac_native: native == InstallPlatform::Mac,
         platforms: vec![native],
-        system: system.map(str::to_string),
+        system: system_of(&rom.platform_slug).map(str::to_string),
         tags: rom
             .regions
             .iter()
@@ -246,14 +355,12 @@ impl RommStore {
             .with_context(|| format!("{app} is not downloaded"))
     }
 
-    /// The ROM's system and the file to download, or why there is none.
-    fn download_of(&self, app: &str) -> Result<(Rom, &'static str, RomFile)> {
+    /// The ROM and its download, or why there is none.
+    fn download_of(&self, app: &str) -> Result<(Rom, Download)> {
         let rom = self.rom(app)?;
-        let system = system_of(&rom.platform_slug);
-        let file = system.and_then(|s| playable_file(&rom, s)).cloned();
-        match (system, file) {
-            (Some(system), Some(file)) => Ok((rom, system, file)),
-            _ => bail!(not_playable(&rom)),
+        match download_plan(&rom) {
+            Some(download) => Ok((rom, download)),
+            None => bail!("{} has no files Irori can play", rom.title()),
         }
     }
 
@@ -450,22 +557,22 @@ impl Store for RommStore {
         _platform: InstallPlatform,
         _query: &InstallInfoQuery,
     ) -> Result<InstallInfo> {
-        let (rom, _, file) = self.download_of(app_name)?;
+        let (rom, download) = self.download_of(app_name)?;
         let resumable = self.has_partial_download(app_name).await;
         Ok(InstallInfo {
             app_name: app_name.to_string(),
             title: rom.title().to_string(),
             // A ROM is the same file on every system.
             platform: HostPlatform::current().native(),
-            download_size: file.file_size_bytes,
-            disk_size: file.file_size_bytes,
+            download_size: download.size(),
+            disk_size: download.size(),
             is_native: true,
             resumable,
             ..Default::default()
         })
     }
 
-    /// Downloaded ROMs whose file changed on the server since, as the
+    /// Downloaded ROMs whose files changed on the server since, as the
     /// library last fetched shows it.
     async fn updatable_games(&self) -> Result<Vec<String>> {
         let state = self.state.read();
@@ -475,8 +582,8 @@ impl Store for RommStore {
             .filter(|(_, record)| !record.pinned_version)
             .filter_map(|(app, record)| {
                 let rom = state.roms.get(app)?;
-                let file = playable_file(rom, &record.system)?;
-                (file.revision() != record.revision).then(|| app.clone())
+                let download = download_plan(rom)?;
+                (download.revision() != record.revision).then(|| app.clone())
             })
             .collect())
     }
@@ -536,21 +643,25 @@ impl Store for RommStore {
         .await
     }
 
-    /// Registers a folder that already holds the ROM's file (by its name on
-    /// the server). Updates are offered once RomM's file differs from it.
+    /// Registers a folder that already holds the ROM's files (by their
+    /// place on the server). Updates are offered once RomM's files differ.
     async fn import(&self, app_name: &str, path: &Path, _platform: InstallPlatform) -> Result<()> {
-        let (rom, system, file) = self.download_of(app_name)?;
-        let found = path.join(irori_core::paths::sanitize(&file.file_name));
-        let size = tokio::fs::metadata(&found)
-            .await
-            .with_context(|| format!("{} is not in {}", file.file_name, path.display()))?
-            .len();
+        let (rom, download) = self.download_of(app_name)?;
+        let mut size = 0;
+        for (place, _) in &download.files {
+            let found = irori_depot::path::join(path, place);
+            size += tokio::fs::metadata(&found)
+                .await
+                .with_context(|| format!("{place} is not in {}", path.display()))?
+                .len();
+        }
+        let main = main_on_disk(&download.main, path).await?;
         let record = InstalledRecord {
             title: rom.title().to_string(),
             install_path: path.to_string_lossy().into_owned(),
-            file: irori_core::paths::sanitize(&file.file_name),
-            system: system.to_string(),
-            file_id: file.id,
+            file: main,
+            files: download.files.into_iter().map(|(place, _)| place).collect(),
+            system: download.system.id.clone(),
             // Unknown until downloaded by Irori: the next check offers it.
             revision: String::new(),
             size,
@@ -605,6 +716,32 @@ impl Store for RommStore {
     }
 }
 
+/// The ROMs Irori lists, by app name.
 fn by_app(roms: Vec<Rom>) -> HashMap<String, Rom> {
-    roms.into_iter().map(|r| (r.id.to_string(), r)).collect()
+    roms.into_iter()
+        .filter(|r| system_of(&r.platform_slug).is_some())
+        .map(|r| (r.id.to_string(), r))
+        .collect()
+}
+
+/// The place of the file the emulator opens in `dir`, a folder holding the
+/// game's files; empty for the folder itself.
+async fn main_on_disk(main: &Main, dir: &Path) -> Result<String> {
+    match main {
+        Main::File(place) => Ok(place.clone()),
+        Main::Folder => Ok(String::new()),
+        Main::DosProgram => {
+            let folder = dir.to_path_buf();
+            let program = tokio::task::spawn_blocking(move || systems::dos_program(&folder))
+                .await
+                .context("looking for the program stopped")?
+                .with_context(|| format!("{} holds no DOS program", dir.display()))?;
+            let place = program.strip_prefix(dir).unwrap_or(&program);
+            Ok(place
+                .components()
+                .map(|c| c.as_os_str().to_string_lossy())
+                .collect::<Vec<_>>()
+                .join("/"))
+        }
+    }
 }

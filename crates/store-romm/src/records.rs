@@ -69,15 +69,17 @@ pub struct LibraryCache {
 #[serde(default)]
 pub struct InstalledRecord {
     pub title: String,
-    /// The folder holding the file.
+    /// The folder holding the game's files.
     pub install_path: String,
-    /// The file's name in that folder.
+    /// The place in that folder (`/`-separated) of the file the emulator
+    /// opens; empty when it opens the folder.
     pub file: String,
+    /// Every file downloaded, by place. Empty in records written when a
+    /// download was only `file`.
+    pub files: Vec<String>,
     /// Irori's system id (`snes`).
     pub system: String,
-    /// The RomM file it came from.
-    pub file_id: u64,
-    /// [`irori_romm_api::RomFile::revision`] of the downloaded file.
+    /// [`crate::Download::revision`] of the downloaded files.
     pub revision: String,
     pub size: u64,
     /// The user keeps this version: no update checks.
@@ -86,7 +88,21 @@ pub struct InstalledRecord {
 
 impl InstalledRecord {
     pub fn path(&self) -> PathBuf {
-        Path::new(&self.install_path).join(&self.file)
+        let dir = Path::new(&self.install_path);
+        if self.file.is_empty() {
+            dir.to_path_buf()
+        } else {
+            irori_depot::path::join(dir, &self.file)
+        }
+    }
+
+    /// The downloaded files, by place.
+    pub fn files(&self) -> Vec<String> {
+        if self.files.is_empty() && !self.file.is_empty() {
+            vec![self.file.clone()]
+        } else {
+            self.files.clone()
+        }
     }
 
     pub fn to_installed_info(&self) -> InstalledInfo {

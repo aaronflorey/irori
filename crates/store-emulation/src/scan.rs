@@ -14,7 +14,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
-use irori_engines::systems::{self, System};
+use irori_engines::systems::{self, System, dos_program, is_dos_program};
 use serde::{Deserialize, Serialize};
 use sha1::{Digest as _, Sha1};
 
@@ -291,20 +291,6 @@ fn is_game_like(path: &Path) -> bool {
     )
 }
 
-fn is_dos_program(path: &Path) -> bool {
-    matches!(extension(path).as_deref(), Some("exe" | "com" | "bat"))
-}
-
-/// Programs that set a DOS game up rather than start it.
-fn is_dos_helper(path: &Path) -> bool {
-    let stem = stem_of(path).to_lowercase();
-    [
-        "setup", "install", "config", "uninst", "readme", "setsound", "sound",
-    ]
-    .iter()
-    .any(|w| stem.starts_with(w))
-}
-
 /// Folder levels searched inside a folder of a system's folder for games
 /// whose program sits deeper (`PS3/Demon's Souls/BLUS30443/PS3_GAME/…`).
 const NESTED_DEPTH: usize = 3;
@@ -398,51 +384,6 @@ fn folder_game(system: &System, folder: &Path, top: &Path, root: &Path) -> Optio
         size: 0,
         stem,
         root: root.to_path_buf(),
-    })
-}
-
-/// The program that starts the DOS game in `folder`: its DOSBox config if it
-/// has one, else the one program that isn't an installer, preferring one
-/// named like the folder.
-pub fn dos_program(folder: &Path) -> Option<PathBuf> {
-    fn programs(dir: &Path) -> Vec<PathBuf> {
-        let mut out: Vec<PathBuf> = std::fs::read_dir(dir)
-            .map(|r| r.flatten().map(|e| e.path()).collect())
-            .unwrap_or_default();
-        out.sort();
-        out
-    }
-    let top = programs(folder);
-    if let Some(conf) = top.iter().find(|p| extension(p).as_deref() == Some("conf")) {
-        return Some(conf.clone());
-    }
-    let wanted = folder
-        .file_name()
-        .map(|n| n.to_string_lossy().to_lowercase())
-        .unwrap_or_default();
-    let pick = |list: &[PathBuf]| -> Option<PathBuf> {
-        let runnable: Vec<&PathBuf> = list
-            .iter()
-            .filter(|p| is_dos_program(p) && !is_dos_helper(p))
-            .collect();
-        runnable
-            .iter()
-            .find(|p| {
-                let s = stem_of(p).to_lowercase();
-                !s.is_empty() && (wanted.starts_with(&s) || s.starts_with(&wanted))
-            })
-            .or_else(|| {
-                runnable
-                    .iter()
-                    .find(|p| extension(p).as_deref() != Some("bat"))
-            })
-            .or(runnable.first())
-            .map(|p| (*p).clone())
-    };
-    pick(&top).or_else(|| {
-        top.iter()
-            .filter(|p| p.is_dir())
-            .find_map(|sub| pick(&programs(sub)))
     })
 }
 
@@ -672,22 +613,5 @@ mod tests {
         );
         // The system's folder (or the ROM folder) is never a game's name.
         assert_eq!(at("/roms/PS3/PS3_GAME"), Path::new("/roms/PS3/PS3_GAME"));
-    }
-
-    #[test]
-    fn picks_dos_programs() {
-        let dir = tempfile::tempdir().unwrap();
-        let game = dir.path().join("Doom");
-        touch(&game.join("INSTALL.EXE"), b"MZ");
-        touch(&game.join("DOOM.EXE"), b"MZ");
-        touch(&game.join("GO.BAT"), b"x");
-        assert!(dos_program(&game).unwrap().ends_with("DOOM.EXE"));
-        let conf = dir.path().join("Quake");
-        touch(&conf.join("QUAKE.EXE"), b"MZ");
-        touch(&conf.join("dosbox.conf"), b"[autoexec]");
-        assert!(dos_program(&conf).unwrap().ends_with("dosbox.conf"));
-        let nested = dir.path().join("Duke");
-        touch(&nested.join("DUKE3D/DUKE3D.EXE"), b"MZ");
-        assert!(dos_program(&nested).unwrap().ends_with("DUKE3D/DUKE3D.EXE"));
     }
 }
