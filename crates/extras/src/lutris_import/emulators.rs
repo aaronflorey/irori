@@ -44,6 +44,9 @@ pub(crate) fn is_emulator(runner: &str) -> bool {
             | "mame"
             | "mupen64plus"
             | "desmume"
+            | "cemu"
+            | "yuzu"
+            | "eden"
     )
 }
 
@@ -76,6 +79,9 @@ pub(crate) fn map(runner: &str, hints: &Hints<'_>) -> Result<EmulatorTarget, Ski
         "mame" => standalone("arcade", "mame"),
         "mupen64plus" => standalone("n64", "mupen64plus"),
         "desmume" => standalone("nds", "desmume"),
+        "cemu" => standalone("wiiu", "cemu"),
+        // Eden carries on yuzu, as Azahar does Citra.
+        "yuzu" | "eden" => standalone("switch", "eden"),
         other => return Err(SkipReason::UnknownRunner(other.to_string())),
     })
 }

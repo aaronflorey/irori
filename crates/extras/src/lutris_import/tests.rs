@@ -662,6 +662,8 @@ fn maps_emulators_to_systems_and_engines() {
     assert_eq!(target("azahar", "a.3ds", None, None), ok("3ds", "azahar"));
     assert_eq!(target("citra", "a.cia", None, None), ok("3ds", "azahar"));
     assert_eq!(target("mame", "pacman", None, None), ok("arcade", "mame"));
+    assert_eq!(target("cemu", "a.wua", None, None), ok("wiiu", "cemu"));
+    assert_eq!(target("yuzu", "a.nsp", None, None), ok("switch", "eden"));
     // Lutris' own Mupen64Plus and DeSmuME runners play with the standalone
     // emulators; their libretro cores stay RetroArch cores.
     assert_eq!(

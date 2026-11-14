@@ -104,6 +104,7 @@ pub const BUILT_IN: &[(&str, &str)] = &[
     ),
     ("epsxe", include_str!("../../../assets/engines/epsxe.json")),
     ("cemu", include_str!("../../../assets/engines/cemu.json")),
+    ("eden", include_str!("../../../assets/engines/eden.json")),
     ("rpcs3", include_str!("../../../assets/engines/rpcs3.json")),
     ("xemu", include_str!("../../../assets/engines/xemu.json")),
     (

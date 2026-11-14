@@ -1168,7 +1168,7 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   console is a **system** (`assets/engines/systems.json`, ids like `psx`, `snes`, `dos`).
   An engine choice is an `EngineRef`, written `duckstation` or `retroarch:<core>`.
 - **Manifests are data.** Each engine is `assets/engines/<id>.json`: sources per OS
-  (GitHub release regexes, the libretro buildbot, a download page, Flatpak id, `PATH`
+  (GitHub or Forgejo release regexes, the libretro buildbot, a download page, Flatpak id, `PATH`
   names, app bundle, Windows paths), the launch template, options with **one** visibility
   rule (`visibleWhen`; an option limited to other hosts adds nothing to the launch),
   BIOS folder, exit hotkey and licence. Never pin a download URL; describe where
@@ -1178,7 +1178,7 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
 - **Engines shipped:** RetroArch (12 cores), DuckStation, PPSSPP, Dolphin, ScummVM,
   DOSBox Staging, PCSX2, melonDS, mGBA, Azahar, Gopher64, MAME, Mupen64Plus, M64Py,
   DeSmuME and ePSXe (these five detected only; ePSXe is closed source), and the
-  experimental Cemu, RPCS3, xemu, shadPS4 and AnyPS5 (never a system's default while
+  experimental Cemu, Eden, RPCS3, xemu, shadPS4 and AnyPS5 (never a system's default while
   another engine plays it). Systems may be `folderOnly` (arcade zips, Xbox images) and
   folder games may name the file engines open (`folderMain`), the files naming them
   (`folderTitle`: PS5 `param.json`, PS3/PS4 `PARAM.SFO` through `irori_engines::sfo`)

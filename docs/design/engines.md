@@ -141,6 +141,7 @@ the experimental engines Cemu (Wii U), RPCS3 (PS3), xemu (Xbox) and shadPS4 (PS4
 | Azahar | 3DS | GitHub releases (AppImage, macOS universal zip, Windows zip) | Flatpak, `PATH`, `Azahar.app` | GPL-2.0-or-later |
 | MAME | Arcade | none: official builds are Windows-only self-extracting archives | Flatpak, `PATH`, Windows locations | GPL-2.0-or-later |
 | Cemu *(experimental)* | Wii U | GitHub releases (AppImage, macOS x64 dmg, Windows zip) | Flatpak, `PATH`, `Cemu.app` | MPL-2.0 |
+| Eden *(experimental)* | Switch | Forgejo releases on `git.eden-emu.dev` (AppImage, macOS arm64 dmg, Windows zip); its GitHub mirror is gone | Flatpak, `PATH`, `Eden.app` | GPL-3.0-or-later |
 | RPCS3 *(experimental)* | PS3 | Linux x64 AppImage from `RPCS3/rpcs3-binaries-linux`; macOS and Windows detected only | Flatpak, `PATH`, `RPCS3.app` | GPL-2.0-only |
 | xemu *(experimental)* | Xbox | GitHub releases (AppImage, macOS universal zip, Windows zip) | Flatpak, `PATH`, `xemu.app` | GPL-2.0-only |
 | shadPS4 *(experimental)* | PS4 | GitHub releases (SDL builds) | `PATH` | GPL-2.0-or-later |
@@ -213,13 +214,14 @@ AnyPS5's own system libraries. Its `kind` is `relinker`.
 
 ### 3.2.3 Legal review of the experimental engines
 
-- All five are open source (MPL-2.0 or GPL-2.0), developed in public, and distributed by
-  their projects from GitHub. Irori downloads the projects' own unmodified releases when
+- All six are open source (MPL-2.0 or GPL), developed in public, and distributed by
+  their projects: Eden (a continuation of yuzu, GPL-3.0) from its own Forgejo server
+  after Nintendo had its GitHub mirror taken down, the rest from GitHub. Irori downloads the projects' own unmodified releases when
   the user asks, exactly as for the other engines; it redistributes nothing.
 - None of them needs Irori to handle copyrighted material, and Irori never does:
   firmware (PS3 system software from Sony's site, PS4 modules), decrypted PS5 games
   (AnyPS5 needs no firmware or keys, but only converts dumps the user made), console keys (Wii U
-  `keys.txt`) and Xbox BIOS, MCPX boot ROM and hard-disk image are set up in each
+  `keys.txt`, Switch `prod.keys` and firmware) and Xbox BIOS, MCPX boot ROM and hard-disk image are set up in each
   emulator's own settings by the user, from hardware they own. Irori neither downloads,
   links to, nor names a source for them; it only explains that they are needed.
 - They are marked `experimental`: shown with an "Experimental" tag, never picked as a

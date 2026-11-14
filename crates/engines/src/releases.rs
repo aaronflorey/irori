@@ -158,6 +158,11 @@ pub async fn fetch(manifest: &EngineManifest, host: Host) -> Result<Vec<Release>
             }
             found
         }
+        Source::Forgejo { server, repo, .. } => {
+            let url = format!("https://{server}/api/v1/repos/{repo}/releases?limit=50");
+            let body = get_text(&url).await?;
+            from_github(&body, pattern, extras, None)?
+        }
         Source::Buildbot {
             index,
             version_pattern,
@@ -231,8 +236,7 @@ fn from_github(
     extras: &[String],
     checksums: Option<&str>,
 ) -> Result<Vec<Release>> {
-    let list: Vec<GhRelease> =
-        serde_json::from_str(body).context("unexpected answer from GitHub")?;
+    let list: Vec<GhRelease> = serde_json::from_str(body).context("unexpected list of releases")?;
     let asset_re = Regex::new(pattern)?;
     let extra_res = extras
         .iter()
@@ -397,6 +401,31 @@ mod tests {
         )
         .unwrap();
         assert_eq!(r[0].version, "0.82.2");
+    }
+
+    #[test]
+    fn forgejo_releases_read_like_github_ones() {
+        // Eden's server: no `updated_at`, and update files beside each build.
+        let body = serde_json::json!([
+            {"tag_name": "v0.2.1", "draft": false, "prerelease": false,
+             "published_at": "2026-06-01T19:57:41+02:00", "assets": [
+                {"name": "Eden-Linux-amd64-gcc-standard.AppImage.zsync", "browser_download_url": "https://x/z", "size": 1},
+                {"name": "Eden-Linux-v0.2.1-amd64-gcc-standard.AppImage", "browser_download_url": "https://x/a", "size": 9, "created_at": "2026-06-01T17:00:00Z"}
+            ]}
+        ])
+        .to_string();
+        let eden = crate::engine("eden").unwrap();
+        let pattern = eden.sources[0]
+            .asset_for(Host {
+                os: crate::host::Os::Linux,
+                arch: "x86_64",
+            })
+            .unwrap();
+        let r = from_github(&body, pattern, &[], None).unwrap();
+        assert_eq!(r.len(), 1);
+        assert_eq!(r[0].version, "0.2.1");
+        assert_eq!(r[0].url, "https://x/a");
+        assert_eq!(r[0].date.as_deref(), Some("2026-06-01"));
     }
 
     #[test]

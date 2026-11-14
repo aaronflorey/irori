@@ -1,0 +1,70 @@
+{
+  "id": "eden",
+  "name": "Eden",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://eden-emu.dev",
+  "kind": "standalone",
+  "experimental": true,
+  "systems": [
+    "switch"
+  ],
+  "sources": [
+    {
+      "type": "forgejo",
+      "server": "git.eden-emu.dev",
+      "repo": "eden-emu/eden",
+      "assets": {
+        "linux-x86_64": "^Eden-Linux-v[\\d.]+-amd64-gcc-standard\\.AppImage$",
+        "linux-aarch64": "^Eden-Linux-v[\\d.]+-aarch64-gcc-standard\\.AppImage$",
+        "macos-aarch64": "^Eden-macOS-v[\\d.]+\\.dmg$",
+        "windows-x86_64": "^Eden-Windows-v[\\d.]+-amd64-msvc-standard\\.zip$",
+        "windows-aarch64": "^Eden-Windows-v[\\d.]+-arm64-clang-standard\\.zip$"
+      }
+    },
+    {
+      "type": "flatpak",
+      "id": "dev.eden_emu.eden"
+    },
+    {
+      "type": "path",
+      "names": [
+        "eden"
+      ]
+    },
+    {
+      "type": "macApp",
+      "bundle": "Eden.app"
+    }
+  ],
+  "binaries": {
+    "linux": [
+      "Eden-Linux-*.AppImage"
+    ],
+    "macos": [
+      "Eden.app"
+    ],
+    "windows": [
+      "eden.exe"
+    ]
+  },
+  "launch": {
+    "args": [
+      {
+        "if": "fullscreen",
+        "args": [
+          "-f"
+        ]
+      },
+      "-g",
+      "{rom}"
+    ]
+  },
+  "options": [
+    {
+      "id": "fullscreen",
+      "kind": "toggle",
+      "default": true
+    }
+  ],
+  "exitHotkey": "Ctrl+Q"
+}

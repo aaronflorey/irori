@@ -38,7 +38,7 @@ serial, take their real title from the game’s own `PARAM.SFO`, and PlayStation
 RetroArch with twelve cores, **DuckStation**, **PPSSPP**, **Dolphin**, **ScummVM**,
 **DOSBox Staging**, **PCSX2**, **melonDS**, **mGBA**, **Azahar** and **Gopher64**. **MAME**,
 **Mupen64Plus**, **M64Py**, **DeSmuME** and **ePSXe** are detected when you have them. **Cemu**,
-**RPCS3**, **xemu**, **shadPS4** and **AnyPS5** are there too, marked experimental, and never become a system’s default while another emulator plays it.
+**Eden**, **RPCS3**, **xemu**, **shadPS4** and **AnyPS5** are there too, marked experimental, and never become a system’s default while another emulator plays it.
 
 Irori downloads emulators from the projects’ own servers when you ask, and never redistributes
 them. Versions sit side by side, so installing a new one changes nothing until you choose Update,
@@ -61,5 +61,5 @@ The Emulators page installs, updates and removes versions and cores, and sets ea
 default.
 
 Systems include NES, SNES, N64, Game Boy, Game Boy Color and Advance, DS, 3DS, GameCube, Wii,
-Wii U, PlayStation 1 to 5, PSP, Xbox, Master System, Genesis, Game Gear, Sega CD, PC Engine, DOS,
+Wii U, Switch, PlayStation 1 to 5, PSP, Xbox, Master System, Genesis, Game Gear, Sega CD, PC Engine, DOS,
 ScummVM adventures and arcade games.

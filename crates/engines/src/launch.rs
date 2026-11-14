@@ -107,6 +107,7 @@ impl EngineUnavailable {
             .iter()
             .filter_map(|s| match s {
                 Source::Github { assets, .. }
+                | Source::Forgejo { assets, .. }
                 | Source::Buildbot { assets, .. }
                 | Source::Page { assets, .. } => Some(assets.keys().cloned()),
                 _ => None,

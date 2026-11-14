@@ -60,6 +60,7 @@ pub fn system_of(platform_slug: &str) -> Option<&'static str> {
         "ngc" => "gamecube",
         "wii" => "wii",
         "wiiu" => "wiiu",
+        "switch" => "switch",
         "sms" => "sms",
         "genesis" => "genesis",
         "gamegear" => "gamegear",

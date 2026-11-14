@@ -758,6 +758,30 @@
       ]
     },
     {
+      "id": "switch",
+      "name": "Nintendo Switch",
+      "short": "Switch",
+      "maker": "Nintendo",
+      "year": 2017,
+      "libretro": "Nintendo - Nintendo Switch",
+      "colors": [
+        "#e60012",
+        "#2b2b2b"
+      ],
+      "extensions": [
+        "xci",
+        "nsp",
+        "nro"
+      ],
+      "folders": [
+        "switch",
+        "nintendo switch"
+      ],
+      "engines": [
+        "eden"
+      ]
+    },
+    {
       "id": "ps3",
       "name": "PlayStation 3",
       "short": "PS3",

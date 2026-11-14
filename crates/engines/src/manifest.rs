@@ -57,6 +57,14 @@ pub enum Source {
         #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
         extra_assets: BTreeMap<String, Vec<String>>,
     },
+    /// Releases on a Forgejo or Gitea server (`server` is its host name),
+    /// read through its release API, which answers like GitHub's. `assets`
+    /// as for GitHub.
+    Forgejo {
+        server: String,
+        repo: String,
+        assets: BTreeMap<String, String>,
+    },
     /// The libretro buildbot: versions are the folders of `index` matching
     /// `version_pattern`; `assets` maps a host key to a path template under
     /// `index` with `{version}`.
@@ -90,7 +98,10 @@ impl Source {
     pub fn is_managed(&self) -> bool {
         matches!(
             self,
-            Source::Github { .. } | Source::Buildbot { .. } | Source::Page { .. }
+            Source::Github { .. }
+                | Source::Forgejo { .. }
+                | Source::Buildbot { .. }
+                | Source::Page { .. }
         )
     }
 
@@ -98,6 +109,7 @@ impl Source {
     pub fn asset_for(&self, host: Host) -> Option<&str> {
         let assets = match self {
             Source::Github { assets, .. }
+            | Source::Forgejo { assets, .. }
             | Source::Buildbot { assets, .. }
             | Source::Page { assets, .. } => assets,
             _ => return None,
@@ -326,7 +338,9 @@ impl EngineManifest {
                     .values()
                     .chain(extra_assets.values().flatten())
                     .collect(),
-                Source::Page { assets, .. } => assets.values().collect(),
+                Source::Forgejo { assets, .. } | Source::Page { assets, .. } => {
+                    assets.values().collect()
+                }
                 Source::Buildbot {
                     version_pattern, ..
                 } => vec![version_pattern],
