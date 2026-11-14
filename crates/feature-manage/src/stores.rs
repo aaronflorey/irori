@@ -67,7 +67,7 @@ pub(crate) fn store_site(runner: Runner) -> Option<StoreSite> {
         },
         // Steam's games come from its own client; Irori has nothing to
         // offer there beyond the library.
-        Runner::Steam | Runner::Sideload | Runner::Emulation | Runner::Launchers => {
+        Runner::Steam | Runner::Sideload | Runner::Emulation | Runner::Romm | Runner::Launchers => {
             return None;
         }
     })

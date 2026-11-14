@@ -14,6 +14,7 @@
 //! approval page and its result goes to the store's login once more.
 
 mod capture;
+mod romm;
 mod steam;
 pub(crate) mod window;
 
@@ -30,8 +31,9 @@ use gpui_kit::component::{
 };
 use gpui_kit::prelude::FluentBuilder as _;
 use gpui_kit::{
-    AnyElement, App, AppContext as _, ClipboardItem, Context, Entity, Focusable as _, IntoElement,
-    ParentElement as _, Render, SharedString, Styled as _, Subscription, Task, Window, div,
+    AnyElement, AnyView, App, AppContext as _, ClipboardItem, Context, Entity, Focusable as _,
+    IntoElement, ParentElement as _, Render, SharedString, Styled as _, Subscription, Task, Window,
+    div,
 };
 use irori_core::{DynStore, LoginApproval, LoginFlow, Paths, Runner};
 use irori_ui::backend;
@@ -116,8 +118,8 @@ enum FlowState {
         instructions: String,
         capture: Option<Regex>,
     },
-    /// Irori draws the store's own sign-in (Steam).
-    InApp(Entity<steam::SteamSignInView>),
+    /// Irori draws the store's own sign-in (Steam, RomM).
+    InApp(AnyView),
     /// A Microsoft account: Microsoft's page at `url` in the sign-in window's
     /// CloudExperienceHost mode. There is no browser fallback.
     Microsoft {
@@ -268,7 +270,18 @@ impl LoginDialog {
                         this.submit(signed_in.0.clone(), window, cx)
                     },
                 ));
-                self.flow = FlowState::InApp(view);
+                self.flow = FlowState::InApp(view.into());
+            }
+            LoginFlow::InApp if self.runner == Runner::Romm => {
+                let view = cx.new(|cx| romm::RommSignInView::new(window, cx));
+                self._subscriptions.push(cx.subscribe_in(
+                    &view,
+                    window,
+                    |this, _, signed_in: &romm::RommSignedIn, window, cx| {
+                        this.submit(signed_in.0.clone(), window, cx)
+                    },
+                ));
+                self.flow = FlowState::InApp(view.into());
             }
             LoginFlow::InApp => {
                 self.flow = FlowState::unavailable(t_args(

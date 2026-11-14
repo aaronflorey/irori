@@ -30,13 +30,15 @@ pub enum Runner {
     /// Console and retro games in the user's ROM folders, played with
     /// emulators.
     Emulation,
+    /// ROMs on the user's RomM server, downloaded and played with emulators.
+    Romm,
     /// Games of official third-party launchers (Battle.net, EA app, Ubisoft
     /// Connect, Rockstar). Read-only: the launcher installs and updates them.
     Launchers,
 }
 
 impl Runner {
-    pub const ALL: [Runner; 10] = [
+    pub const ALL: [Runner; 11] = [
         Runner::Legendary,
         Runner::Gog,
         Runner::Nile,
@@ -46,6 +48,7 @@ impl Runner {
         Runner::Steam,
         Runner::Sideload,
         Runner::Emulation,
+        Runner::Romm,
         Runner::Launchers,
     ];
 
@@ -61,6 +64,7 @@ impl Runner {
             Runner::Steam => "steam",
             Runner::Sideload => "sideload",
             Runner::Emulation => "emulation",
+            Runner::Romm => "romm",
             Runner::Launchers => "launchers",
         }
     }
@@ -77,6 +81,7 @@ impl Runner {
             Runner::Steam => "Steam",
             Runner::Sideload => "Added manually",
             Runner::Emulation => "Emulated",
+            Runner::Romm => "RomM",
             Runner::Launchers => "Other launchers",
         }
     }
@@ -93,6 +98,7 @@ impl Runner {
             Runner::Steam => "Steam",
             Runner::Sideload => "Other",
             Runner::Emulation => "Emulated",
+            Runner::Romm => "RomM",
             Runner::Launchers => "Launchers",
         }
     }
@@ -108,6 +114,7 @@ impl Runner {
             "steam" => Runner::Steam,
             "sideload" => Runner::Sideload,
             "emulation" => Runner::Emulation,
+            "romm" => Runner::Romm,
             "launchers" => Runner::Launchers,
             _ => return None,
         })
@@ -132,6 +139,12 @@ impl Runner {
     /// and starts them, nothing more.
     pub fn manages_installs(self) -> bool {
         !matches!(self, Runner::Steam | Runner::Launchers)
+    }
+
+    /// Whether this store's games are ROMs played with emulators: no Wine,
+    /// prefix, sandbox, mods or PC compatibility data apply to them.
+    pub fn plays_roms(self) -> bool {
+        matches!(self, Runner::Emulation | Runner::Romm)
     }
 }
 

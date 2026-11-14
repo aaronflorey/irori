@@ -178,7 +178,7 @@ impl GamePage {
         if !genres.is_empty() {
             rows.push(row(t("game.details.genres"), chips(genres), muted));
         }
-        if self.id.runner != irori_core::Runner::Emulation {
+        if !self.id.runner.plays_roms() {
             let platforms: Vec<String> = crate::install::installable_platforms(game)
                 .iter()
                 .map(|p| platform_label(*p).to_string())

@@ -14,6 +14,8 @@
 //! - converting games for engines that turn them into programs of this
 //!   computer ([`relink`]);
 //! - turning a game file into a command ([`launch`]);
+//! - turning a ROM into the launch plan services run, for every store of
+//!   ROMs ([`play`]);
 //! - reading the titles PlayStation games give themselves ([`sfo`]).
 //!
 //! Nothing here has a UI or blocks a Tokio worker: discovery and hashing run
@@ -27,6 +29,7 @@ pub mod host;
 pub mod install;
 pub mod launch;
 pub mod manifest;
+pub mod play;
 pub mod releases;
 pub mod relink;
 pub mod retroarch;

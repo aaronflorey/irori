@@ -1222,6 +1222,7 @@ impl ShownStores {
             | Runner::Xbox
             | Runner::Sideload
             | Runner::Emulation
+            | Runner::Romm
             | Runner::Launchers => true,
         }
     }
@@ -1239,6 +1240,7 @@ impl ShownStores {
             | Runner::Xbox
             | Runner::Sideload
             | Runner::Emulation
+            | Runner::Romm
             | Runner::Launchers => {}
         }
     }

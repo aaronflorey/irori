@@ -49,7 +49,7 @@ pub(crate) struct Shown {
 impl Shown {
     pub(crate) fn new(application: String, id: &GameId, game: &GameInfo, started_ms: i64) -> Self {
         let store = match id.runner {
-            Runner::Sideload | Runner::Emulation | Runner::Launchers => None,
+            Runner::Sideload | Runner::Emulation | Runner::Romm | Runner::Launchers => None,
             runner => Some(runner.store_name()),
         };
         let web = |url: &Option<String>, max: usize| {

@@ -38,6 +38,8 @@ irori-steam-api = { path = "crates/steam" }
 irori-retroachievements-api = { path = "crates/retroachievements" }
 irori-xbox-api = { path = "crates/xbox" }
 irori-itch = { path = "crates/store-itch" }
+irori-romm-api = { path = "crates/romm" }
+irori-romm = { path = "crates/store-romm" }
 irori-launchers-data = { path = "crates/launchers" }
 irori-services = { path = "crates/services" }
 irori-extras = { path = "crates/extras" }

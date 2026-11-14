@@ -493,10 +493,7 @@ impl GamePage {
         };
         // PC compatibility data (ProtonDB, Steam Deck) says nothing about
         // emulated games, and a title match would be another game.
-        if matches!(
-            game.runner(),
-            irori_core::Runner::Sideload | irori_core::Runner::Emulation
-        ) {
+        if game.runner() == irori_core::Runner::Sideload || game.runner().plays_roms() {
             return;
         }
         let Some(task) = hooks::fetch_compatibility(game, cx) else {

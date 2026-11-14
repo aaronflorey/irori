@@ -571,9 +571,7 @@ pub fn parse_version(output: &str) -> Option<(u32, u32)> {
 /// (not Steam or another launcher), and not through an emulator, which may
 /// be a Flatpak that can't start inside the sandbox.
 pub fn applies_to(runner: irori_core::Runner) -> bool {
-    cfg!(target_os = "linux")
-        && runner.manages_installs()
-        && runner != irori_core::Runner::Emulation
+    cfg!(target_os = "linux") && runner.manages_installs() && !runner.plays_roms()
 }
 
 /// The game's own home folder: `<data>/sandbox/<runner>/<app>`. Its saves

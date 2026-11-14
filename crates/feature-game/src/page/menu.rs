@@ -170,7 +170,7 @@ pub(super) fn build_menu(
                 },
             ));
         }
-        if id.runner == Runner::Emulation {
+        if id.runner.plays_roms() {
             let i = id.clone();
             menu = menu.item(item("game.play_with.menu", IconName::Joystick).on_click(
                 move |_, window, cx| crate::open_play_with_dialog(i.clone(), window, cx),

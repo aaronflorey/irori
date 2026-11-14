@@ -150,7 +150,7 @@ fn ecosystem_cache() -> PathBuf {
 pub fn supports_mods(game: &GameInfo) -> bool {
     game.is_installed
         && game.browser_url.is_none()
-        && !matches!(game.runner(), Runner::Emulation)
+        && !game.runner().plays_roms()
         && game.install_path().is_some()
 }
 

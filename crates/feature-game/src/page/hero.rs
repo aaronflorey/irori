@@ -264,7 +264,7 @@ impl GamePage {
                     .join(", "),
             ),
         }
-        .filter(|p| !p.is_empty() && game.runner() != irori_core::Runner::Emulation);
+        .filter(|p| !p.is_empty() && !game.runner().plays_roms());
         let genres = self
             .extra
             .ready()
@@ -877,7 +877,7 @@ impl GamePage {
             return play;
         }
         let current = self.selected_option.clone();
-        let emulated = self.id.runner == irori_core::Runner::Emulation;
+        let emulated = self.id.runner.plays_roms();
         let id = self.id.clone();
         let more = Button::new("play-with")
             .outline()

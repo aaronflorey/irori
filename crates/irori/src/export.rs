@@ -7,8 +7,9 @@
 //! within a version, so readers ignore what they don't know.
 //!
 //! Only games Irori installs and runs itself are listed. Steam's games and
-//! third-party launchers' games run through their own clients, and the ROM
-//! library runs through emulators, so none of them has a prefix of Irori's.
+//! third-party launchers' games run through their own clients, and ROMs (the
+//! ROM library, RomM) run through emulators, so none of them has a prefix of
+//! Irori's.
 
 use std::path::{Path, PathBuf};
 
@@ -72,7 +73,7 @@ pub struct ExportedWine {
 
 /// Whether `runner`'s games belong in the export (see the module docs).
 pub fn listed(runner: Runner) -> bool {
-    runner.manages_installs() && runner != Runner::Emulation
+    runner.manages_installs() && !runner.plays_roms()
 }
 
 /// One installed game's entry. `wine` is the build Irori would run it with,
@@ -346,5 +347,6 @@ mod tests {
         assert!(!listed(Runner::Steam));
         assert!(!listed(Runner::Launchers));
         assert!(!listed(Runner::Emulation));
+        assert!(!listed(Runner::Romm));
     }
 }

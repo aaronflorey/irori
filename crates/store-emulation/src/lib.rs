@@ -28,14 +28,12 @@ use anyhow::{Context as _, Result, bail};
 use async_trait::async_trait;
 use irori_core::{
     Event, EventBus, ExtraInfo, GameInfo, HostPlatform, InstallInfo, InstallInfoQuery,
-    InstallPlatform, InstallRequest, InstalledInfo, LaunchPlan, LaunchRequest, LoginFlow, Notice,
-    NoticeLevel, OpContext, Outcome, Paths, RemoveArgs, Runner, SettingsFn, Store, UpdateRequest,
-    UserInfo, json_store,
+    InstallPlatform, InstallRequest, InstalledInfo, LaunchPlan, LaunchRequest, LoginFlow,
+    OpContext, Outcome, Paths, RemoveArgs, Runner, SettingsFn, Store, UpdateRequest, UserInfo,
+    json_store,
 };
-use irori_engines::launch::{GameFile, LaunchInput};
-use irori_engines::{
-    BiosMissing, EngineKind, EngineMissing, EngineRef, EngineUnavailable, Host, bios, systems,
-};
+use irori_engines::launch::GameFile;
+use irori_engines::systems;
 use parking_lot::{Mutex, RwLock};
 use serde::{Deserialize, Serialize};
 
@@ -46,8 +44,6 @@ pub use scan::{RomEntry, dos_program};
 const SETTLE: Duration = Duration::from_secs(2);
 /// Availability checks give up on hung network mounts after this.
 const AVAILABILITY_TIMEOUT: Duration = Duration::from_secs(3);
-/// The `/dev/udmabuf` warning is shown once per run.
-static UDMABUF_WARNED: AtomicBool = AtomicBool::new(false);
 
 const NOT_INSTALLABLE: &str =
     "Games in your ROM folders are not installed by Irori; add the folder that holds them";
@@ -335,21 +331,6 @@ impl EmulationStore {
         });
         *slot = Some((folders, watcher));
     }
-
-    /// The emulator `settings` chose for a game of `system`, else the
-    /// system's default. Blocking.
-    fn choice_for(&self, system: &str, chosen: &str) -> Option<EngineRef> {
-        if let Some(c) = EngineRef::parse(chosen) {
-            return Some(c);
-        }
-        let app = (self.settings)();
-        let state = irori_engines::state::load();
-        irori_engines::default_choice(
-            system,
-            app.system_engines.get(system).map(String::as_str),
-            |c| irori_engines::plays_now(c, &state),
-        )
-    }
 }
 
 /// What the library shows for an entry.
@@ -602,174 +583,11 @@ impl Store for EmulationStore {
         let entry = self
             .entry(app_name)
             .context("This game is not in the library")?;
-        let system = systems::get(&entry.system)
-            .with_context(|| format!("Irori does not know the system {}", entry.system))?;
-        let settings = request.settings.clone();
-
-        // Checked first: no emulator download helps a game without its BIOS.
-        let app = (self.settings)();
-        let bios_root = (!app.bios_folder.trim().is_empty())
-            .then(|| irori_core::paths::expand_home(&app.bios_folder));
-        let sys_id = entry.system.clone();
-        let index = tokio::task::spawn_blocking(move || -> Result<bios::BiosIndex> {
-            let mut index = bios::cached_index();
-            if let Some(root) = &bios_root
-                && &index.root != root
-            {
-                index = bios::scan(root, &index)?;
-            }
-            let system = systems::get(&sys_id).context("unknown system")?;
-            BiosMissing::check(system, &index)?;
-            Ok(index)
-        })
-        .await
-        .context("checking BIOS files stopped")??;
-
-        let me = self.me.upgrade().context("the store is shutting down")?;
-        let (sys, chosen) = (entry.system.clone(), settings.engine.clone());
-        let choice = tokio::task::spawn_blocking(move || me.choice_for(&sys, &chosen))
-            .await
-            .context("choosing the emulator stopped")?
-            .with_context(|| format!("No emulator plays {} games", system.name))?;
-        let manifest = irori_engines::engine(&choice.engine)
-            .with_context(|| format!("Irori does not know the emulator {}", choice.engine))?;
-
-        // RetroArch cores are small: fetch a missing one on the way.
-        if let Some(core) = &choice.core
-            && irori_engines::retroarch::installed_core(core).is_none()
-        {
-            (ctx.step)("Installing the emulator core");
-            let installed = irori_engines::retroarch::install_core(core, &ctx).await;
-            if !matches!(installed, Ok(Some(_))) {
-                let missing = EngineMissing {
-                    engine: manifest.id.clone(),
-                    name: manifest.name.clone(),
-                    core: Some(core.clone()),
-                    pinned: None,
-                };
-                return Err(match installed {
-                    Err(e) => anyhow::Error::new(missing).context(format!("{e:#}")),
-                    _ => missing.into(),
-                });
-            }
-            self.bus.emit(Event::EnginesChanged);
-        }
-
-        let (m, game_path, sys_id, values_set) = (
-            manifest.clone(),
-            entry.path.clone(),
-            entry.system.clone(),
-            settings
-                .engine_options
-                .get(&manifest.id)
-                .map(|o| o.iter().map(|(k, v)| (k.clone(), v.clone())).collect())
-                .unwrap_or_default(),
-        );
-        let (pin, own_settings, core) = (
-            settings.engine_version.clone(),
-            settings.engine_own_settings,
-            choice.core.clone(),
-        );
         let game = GameFile {
-            path: game_path,
-            system: sys_id,
+            path: entry.path,
+            system: entry.system,
         };
-        let m2 = m.clone();
-        let installation = tokio::task::spawn_blocking(move || -> Result<_> {
-            let state = irori_engines::state::load();
-            let installs = irori_engines::discovery::find(&m2, &state);
-            let found = irori_engines::launch::resolve(
-                &m2,
-                &installs,
-                Some(pin.as_str()),
-                state.preferred.get(&m2.id).map(String::as_str),
-            );
-            match found {
-                Ok(installation) => Ok(installation.clone()),
-                // Offering to install an engine Irori can't download here
-                // would only fail: say why instead.
-                Err(missing) if missing.pinned.is_none() => {
-                    Err(match EngineUnavailable::no_build(&m2, Host::current()) {
-                        Some(unavailable) => unavailable.into(),
-                        None => missing.into(),
-                    })
-                }
-                Err(missing) => Err(missing.into()),
-            }
-        })
-        .await
-        .context("finding the emulator stopped")??;
-
-        if manifest.kind == EngineKind::Relinker {
-            if irori_engines::relink::udmabuf_denied()
-                && !UDMABUF_WARNED.swap(true, Ordering::Relaxed)
-            {
-                self.bus.notice(
-                    Notice::new(
-                        NoticeLevel::Warning,
-                        format!(
-                            "{}: this account can't use /dev/udmabuf, so games may run slowly. Add yourself to the group that owns it (often kvm) and sign in again.",
-                            manifest.name
-                        ),
-                    )
-                    .keys(
-                        "shell.notice.udmabuf",
-                        None,
-                        &[("engine", &manifest.name)],
-                    ),
-                );
-            }
-            if irori_engines::relink::prepare(&manifest, &installation, &game, &ctx)
-                .await?
-                .is_none()
-            {
-                bail!("The game's conversion was stopped");
-            }
-        }
-
-        let first_time_hotkey = tokio::task::spawn_blocking(move || -> Result<_> {
-            let values = m.option_values(&values_set);
-            let command = irori_engines::launch::command(&LaunchInput {
-                manifest: &m,
-                installation: &installation,
-                game: &game,
-                core: core.as_deref(),
-                values: &values,
-                bios: &index,
-                own_settings,
-            })?;
-            let first = irori_engines::state::update(|s| s.hotkey_shown.insert(m.id.clone()))
-                .unwrap_or(false);
-            Ok((command, first))
-        })
-        .await
-        .context("preparing the emulator stopped")??;
-        let (command, first_time) = first_time_hotkey;
-        if first_time && !manifest.exit_hotkey.is_empty() {
-            self.bus.notice(
-                Notice::new(
-                    NoticeLevel::Info,
-                    format!(
-                        "{}: to leave a game, {}",
-                        manifest.name, manifest.exit_hotkey
-                    ),
-                )
-                .keys(
-                    "shell.notice.exit_hotkey",
-                    None,
-                    &[("engine", &manifest.name), ("keys", &manifest.exit_hotkey)],
-                ),
-            );
-        }
-        let env = &request.environment;
-        Ok(LaunchPlan {
-            command: command
-                .envs(env.env.clone())
-                .args(request.extra_args.clone())
-                .wrapped(&env.wrappers),
-            track_wineserver: false,
-            watch: None,
-        })
+        irori_engines::play::launch_plan(&self.bus, (self.settings)(), game, request, &ctx).await
     }
 }
 

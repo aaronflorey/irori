@@ -93,6 +93,7 @@ impl KnownFixesFile {
             | Runner::Steam
             | Runner::Sideload
             | Runner::Emulation
+            | Runner::Romm
             | Runner::Launchers => return None,
         };
         store.get(app_name)

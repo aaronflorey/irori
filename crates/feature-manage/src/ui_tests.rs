@@ -706,3 +706,89 @@ fn xbox_friends_have_a_tab_of_their_own(cx: &mut TestAppContext) {
     // Read only: nothing to join or message.
     assert!(vcx.debug_bounds("friend-join-31").is_none());
 }
+
+/// RomM's sign-in: the server's address, then RomM's approval in the
+/// browser; once RomM issues the token the dialog signs in and closes.
+#[gpui_kit::test]
+fn romm_signs_in_once_approved_in_the_browser(cx: &mut TestAppContext) {
+    use irori_depot::test_server::{Resp, TestServer};
+    use serde_json::json;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    let rt = tokio::runtime::Runtime::new().expect("runtime");
+    let _rt = rt.enter();
+    let polls = Arc::new(AtomicUsize::new(0));
+    let seen = polls.clone();
+    let server = TestServer::start(move |req| match req.path.as_str() {
+        "/api/auth/device/init" => Resp {
+            status: 201,
+            ..Resp::json(json!({
+                "device_code": "DC",
+                "user_code": "WXYZ2345",
+                "verification_path": "/pair/device",
+                "verification_path_complete": "/pair/device?user_code=WXYZ2345",
+                "expires_in": 600,
+                "interval": 1
+            }))
+        },
+        "/api/auth/device/token" if seen.fetch_add(1, Ordering::SeqCst) == 0 => Resp {
+            body: br#"{"detail":"authorization_pending"}"#.to_vec(),
+            ..Resp::status(400)
+        },
+        "/api/auth/device/token" => Resp::json(json!({
+            "access_token": "rmm_ui", "device_id": "d", "scopes": [], "expires_at": null
+        })),
+        "/api/users/me" if req.header("authorization") == Some("Bearer rmm_ui") => {
+            Resp::json(json!({"id": 1, "username": "samus"}))
+        }
+        "/api/roms?limit=500&offset=0&with_files=true&with_char_index=false&with_filter_values=false&with_rom_id_index=false&order_by=id" => {
+            Resp::json(json!({"items": []}))
+        }
+        _ => Resp::status(404),
+    });
+
+    let dir = tempfile::tempdir().expect("temp dir");
+    let store = irori_romm::RommStore::with_layout(
+        irori_core::EventBus::new(),
+        Arc::new(|| Arc::new(irori_core::AppSettings::default())),
+        irori_romm::Layout {
+            config: dir.path().join("config"),
+            cache: dir.path().join("cache"),
+        },
+    );
+    let shared: DynStore = store.clone();
+    setup_with(cx, move || vec![shared]);
+    let (handle, _view) = cx.update(|cx| {
+        gpui_kit::open_window(WindowOptions::default(), cx, |window, cx| {
+            cx.new(|cx| AccountsView::new(window, cx))
+        })
+        .expect("window opens")
+    });
+    let mut vcx = VisualTestContext::from_window(handle, cx);
+    vcx.update(|window, cx| crate::open_login_dialog(Runner::Romm, window, cx));
+    // The dialog asks the store for its flow on the backend's pool.
+    let wait_for = |vcx: &mut VisualTestContext, done: &dyn Fn(&mut VisualTestContext) -> bool| {
+        for _ in 0..100 {
+            vcx.executor()
+                .advance_clock(std::time::Duration::from_secs(1));
+            vcx.run_until_parked();
+            if done(vcx) {
+                return;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+        panic!("timed out");
+    };
+    wait_for(&mut vcx, &|vcx| vcx.debug_bounds("romm-continue").is_some());
+
+    vcx.simulate_input(&server.base());
+    click(&mut vcx, "romm-continue");
+    wait_for(&mut vcx, &|vcx| {
+        vcx.update(|window, cx| !gpui_kit::component::WindowExt::has_active_dialog(window, cx))
+    });
+    assert_eq!(
+        store.user().map(|u| u.display_name),
+        Some("samus (127.0.0.1)".to_string())
+    );
+    assert!(polls.load(Ordering::SeqCst) >= 2, "waited for the approval");
+}

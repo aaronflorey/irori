@@ -5021,6 +5021,7 @@ dependencies = [
  "irori-launchers",
  "irori-library",
  "irori-manage",
+ "irori-romm",
  "irori-runtime",
  "irori-secrets",
  "irori-services",
@@ -5535,6 +5536,7 @@ dependencies = [
  "gpui-pre",
  "irori-amazon-api",
  "irori-core",
+ "irori-depot",
  "irori-emulation",
  "irori-engines",
  "irori-epic-api",
@@ -5542,6 +5544,7 @@ dependencies = [
  "irori-gog-api",
  "irori-launchers",
  "irori-retroachievements-api",
+ "irori-romm",
  "irori-runtime",
  "irori-services",
  "irori-steam",
@@ -5682,6 +5685,46 @@ dependencies = [
  "thiserror 2.0.21",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "irori-romm"
+version = "1.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "fs4",
+ "hex",
+ "irori-core",
+ "irori-depot",
+ "irori-engines",
+ "irori-romm-api",
+ "irori-secrets",
+ "parking_lot",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha1 0.10.7",
+ "sysinfo 0.39.6",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "url",
+ "uuid 1.28.0",
+]
+
+[[package]]
+name = "irori-romm-api"
+version = "1.1.0"
+dependencies = [
+ "anyhow",
+ "irori-depot",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "tokio",
+ "url",
 ]
 
 [[package]]

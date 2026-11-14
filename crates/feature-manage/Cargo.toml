@@ -12,6 +12,7 @@ irori-core.workspace = true
 irori-services.workspace = true
 irori-engines.workspace = true
 irori-emulation.workspace = true
+irori-romm.workspace = true
 irori-retroachievements-api.workspace = true
 irori-launchers.workspace = true
 irori-steam.workspace = true
@@ -40,3 +41,5 @@ irori-epic-api.workspace = true
 irori-gog-api.workspace = true
 # Endpoints for a Steam store that never reaches Steam.
 irori-steam-api.workspace = true
+# A stand-in RomM server for its sign-in.
+irori-depot = { workspace = true, features = ["test-server"] }

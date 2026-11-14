@@ -307,6 +307,9 @@ build Irori yourself, see [Building](#building).
 - **ROM folders** scanned and watched, with each game's system, region and revision
   from its file name, a generated cover, and the BIOS files each system needs checked
   before you play.
+- **RomM:** sign in to your RomM server (5.0 or later) in the browser and your whole
+  ROM collection joins the library. Super Nintendo games download, update when the file
+  changes on the server, and play like any ROM; other systems follow.
 
 <p align="center">
   <picture>

@@ -33,7 +33,7 @@ pub struct Grouped {
 
 /// Whether Irori may match copies of games from `runner` by itself.
 fn matched_automatically(runner: Runner) -> bool {
-    !matches!(runner, Runner::Sideload | Runner::Emulation)
+    runner != Runner::Sideload && !runner.plays_roms()
 }
 
 /// The year a release date starts with.

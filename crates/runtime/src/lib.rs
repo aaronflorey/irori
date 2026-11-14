@@ -471,7 +471,7 @@ async fn sandbox_wrapper(
         return Ok(Vec::new());
     }
     anyhow::ensure!(
-        target.id.runner != irori_core::Runner::Emulation,
+        !target.id.runner.plays_roms(),
         "Emulated games can't run in a sandbox yet. Turn the sandbox off in the game's settings."
     );
     let mut game_dirs: Vec<PathBuf> = target.game.install_path().into_iter().collect();

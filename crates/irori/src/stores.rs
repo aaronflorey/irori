@@ -95,6 +95,8 @@ pub fn build(bus: EventBus, settings: SettingsFn) -> Vec<DynStore> {
     let launchers = irori_launchers::LaunchersStore::new(bus.clone(), settings.clone());
     let _ = LAUNCHERS.set(launchers.clone());
     stores.push(launchers);
+    // Empty until signed in to a RomM server.
+    stores.push(irori_romm::RommStore::new(bus.clone(), settings.clone()));
     let emulation = irori_emulation::EmulationStore::new(bus.clone(), settings.clone());
     let _ = EMULATION.set(emulation.clone());
     stores.push(emulation);

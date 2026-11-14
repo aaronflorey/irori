@@ -30,13 +30,14 @@ use crate::login::{open_account_login_dialog, open_login_dialog};
 
 /// Stores with a card on the accounts page, in display order. Steam has no
 /// login: its card reports what Irori found on this computer.
-pub(crate) const ACCOUNT_STORES: [Runner; 7] = [
+pub(crate) const ACCOUNT_STORES: [Runner; 8] = [
     Runner::Legendary,
     Runner::Gog,
     Runner::Nile,
     Runner::Zoom,
     Runner::Itch,
     Runner::Xbox,
+    Runner::Romm,
     Runner::Steam,
 ];
 
@@ -55,6 +56,7 @@ pub(crate) fn store_icon(runner: Runner) -> IconName {
         Runner::Steam => IconName::Joystick,
         Runner::Sideload => IconName::FolderOpen,
         Runner::Emulation => IconName::Gamepad,
+        Runner::Romm => IconName::HardDrive,
         Runner::Launchers => IconName::Rocket,
     }
 }

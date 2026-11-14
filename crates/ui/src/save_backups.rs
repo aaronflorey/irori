@@ -20,7 +20,7 @@ use gpui_kit::{
     PathPromptOptions, Render, SharedString, Styled as _, Subscription, UniformListScrollHandle,
     Window, div, rems, uniform_list,
 };
-use irori_core::{GameId, GameInfo, Runner, util};
+use irori_core::{GameId, GameInfo, util};
 use irori_services::ludusavi::{Change, INSTALL_URL, Source, TitleMatch};
 use irori_services::{BackupItem, GameBackups, LudusaviInfo, RestorePlan, SavesKeeper};
 use serde_json::Value;
@@ -35,7 +35,7 @@ const VISIBLE_ROWS: usize = 6;
 /// Whether Ludusavi can back up `game`: browser games keep no saves, and
 /// Ludusavi's data set knows programs, not the ROMs an emulator plays.
 pub fn offers_backups(game: &GameInfo) -> bool {
-    game.browser_url.is_none() && game.runner() != Runner::Emulation
+    game.browser_url.is_none() && !game.runner().plays_roms()
 }
 
 /// Open the save backups of a game as a sheet.
@@ -1072,6 +1072,7 @@ impl Render for LudusaviPanel {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use irori_core::Runner;
 
     #[test]
     fn dates_backups_in_local_time() {
@@ -1141,5 +1142,6 @@ mod tests {
             Some("https://example.com")
         )));
         assert!(!offers_backups(&game(Runner::Emulation, None)));
+        assert!(!offers_backups(&game(Runner::Romm, None)));
     }
 }

@@ -157,6 +157,7 @@ Directory names and package names differ. Use the package name with `-p`.
 | `crates/gog` | `irori-gog-api` | GOG protocol (port of gogdl): auth, content system, depots, Linux installers, saves |
 | `crates/amazon` | `irori-amazon-api` | Amazon Games protocol (port of nile): device sign-in, library, signed manifests |
 | `crates/itch` | `irori-itch-api` | itch.io protocol (its public API): API-key login, owned keys, uploads, download links |
+| `crates/romm` | `irori-romm-api` | RomM protocol (RomM 5.0+): server addresses, device sign-in, the ROM library, file downloads |
 | `crates/steam` | `irori-steam-api` | Steam Web API: login (QR, password and Steam Guard, tokens), owned and Family games, store art and pages, achievements |
 | `crates/retroachievements` | `irori-retroachievements-api` | RetroAchievements: Web API (profile, console game lists, game progress), the emulators' token login, and rcheevos-compatible ROM hashes |
 | `crates/xbox` | `irori-xbox-api` | Xbox network: Microsoft account sign-in (OAuth with PKCE), Xbox Live user and XSTS tokens, title history, minutes played, achievements |
@@ -167,6 +168,7 @@ Directory names and package names differ. Use the package name with `-p`.
 | `crates/store-amazon` | `irori-amazon` | Amazon `Store` (`Runner::Nile`) |
 | `crates/store-zoom` | `irori-zoom` | ZOOM Platform `Store`, opt-in through a setting |
 | `crates/store-itch` | `irori-itch` | itch.io `Store` (`Runner::Itch`), opt-in through `iroriItchIo` |
+| `crates/store-romm` | `irori-romm` | RomM `Store` (`Runner::Romm`): the server's ROMs, downloaded and played with emulators (Super Nintendo only for now) |
 | `crates/msstore` | `irori-msstore-api` | Microsoft Store and Xbox Live protocol (port of Xodus): device registration, RST2 with XML-DSig, CLEP and SPLicense secrets, SISU and XSTS, the display catalog and Store browsing, package plans, content licences and offline leases, entitlements, Game Pass, offline PC |
 | `crates/msixvc` | `irori-msixvc` | MSIXVC packages (port of Xodus): XVD and its NTFS volume, AES-XTS, hash tree, streaming downloads with resume checkpoints |
 | `crates/store-xbox` | `irori-xbox` | Xbox `Store` (`Runner::Xbox`, Linux), opt-in through `iroriXbox`: Microsoft Store and PC Game Pass installs, licensed launches through a decrypted launch view, the in-game account service |
@@ -222,12 +224,12 @@ irori-core                        (depends on nothing internal)
   ├─ irori-reshade   (core, runtime; knows nothing of stores or the UI)
   ├─ protocol crates: irori-epic-api, irori-gog-api, irori-amazon-api, irori-itch-api,
   │                   irori-steam-api, irori-retroachievements-api, irori-xbox-api,
-  │                   irori-msstore-api, irori-msixvc
+  │                   irori-msstore-api, irori-msixvc, irori-romm-api
   │                   (depot and secrets only, not core)
   ├─ store crates:    irori-epic, irori-gog, irori-amazon, irori-zoom, irori-itch,
   │                   irori-steam, irori-sideload, irori-xbox (+ runtime, irori-msstore-api,
   │                   irori-msixvc, irori-xbox-api), irori-emulation (+ engines,
-  │                   irori-retroachievements-api),
+  │                   irori-retroachievements-api), irori-romm (+ engines, irori-romm-api),
   │                   irori-launchers (+ runtime, irori-launchers-data, irori-xbox-api)
   └─ irori-services   (core, depot, runtime, extras, engines, scripts, mods, reshade, irori-steam-api
                       for Steam's public achievement schema; stores reach it as `DynStore`)
@@ -294,11 +296,14 @@ and `launch.rs` before changing anything below the UI.
   - `SaveConflict`: saves changed both locally and in the cloud since the last sync.
     Return it for every direction except the forced ones; the launch stops and the UI
     asks which saves to keep (`irori_ui::save_conflict`).
-- `Runner` values are Legendary, Gog, Nile, Zoom, Itch, Xbox, Steam, Sideload, Emulation
-  and Launchers. Their
+- `Runner` values are Legendary, Gog, Nile, Zoom, Itch, Xbox, Steam, Sideload, Emulation,
+  Romm and Launchers. Their
   serialized ids are Heroic's (`legendary`, `gog`, `nile`, …); `from_id` also accepts
   `epic` and `amazon`. Irori-only runners use their store's plain name (`itch`,
-  `steam`).
+  `steam`, `romm`).
+- `Runner::plays_roms()` is true for Emulation and Romm: their games are ROMs an
+  emulator plays, so Wine, prefixes, the sandbox, mods, save backups and PC
+  compatibility data don't apply. Check it rather than naming either runner.
 - `Runner::manages_installs()` is false for Steam and Launchers: its games are listed and launched,
   never installed, moved, repaired or removed by Irori. UI code hides those commands and
   services refuse them before touching files. Steam's client takes them instead:
@@ -845,8 +850,8 @@ The shell registers the stores in `crates/irori/src/stores.rs`, in this order: E
 GOG, Amazon, ZOOM (only when `settings.zoom_platform` is on), itch.io (always
 registered; empty and signed out while `settings.itch_io` is off, so its account card
 can turn it on), Xbox (Linux only; empty while `iroriXbox` is off), Steam, Launchers
-(always registered; empty while `iroriThirdPartyLaunchers` is off), Emulation (the ROM
-library), then Sideload. Adding a
+(always registered; empty while `iroriThirdPartyLaunchers` is off), RomM (empty until
+signed in), Emulation (the ROM library), then Sideload. Adding a
 store means:
 
 1. A protocol crate, if the store has a protocol.
@@ -1236,6 +1241,20 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   writes it where each emulator reads it (`irori_engines::cheevos`: RetroArch, PCSX2,
   PPSSPP, Dolphin); DuckStation encrypts its token per machine, so Irori only turns
   achievements on there.
+- **RomM** (`irori-romm`, `Runner::Romm`, serialized id `romm`, app names are RomM's ROM
+  ids): the user's self-hosted RomM server (5.0 or later). Sign-in is RomM's device flow:
+  the login dialog draws a server field (`irori_manage` `login/romm.rs`), opens RomM's
+  `/pair/device` page in the browser and polls until RomM issues a client API token
+  (`rmm_…`, scopes `me.read roms.read platforms.read`), kept with `irori_secrets`; the
+  device id in `<config>/device-id` keeps one entry in RomM's device list per
+  installation. Every ROM the account sees is listed (cached for offline); only systems
+  `irori_romm::system_of` maps can be downloaded, Super Nintendo for now. A download is
+  one file of the ROM (the system's extension, else a zip, which RetroArch reads) through
+  `irori-depot`, verified by RomM's SHA-1 when it has one, into
+  `<install folder>/<RomM file name>/`; an update is offered when that file's id, size or
+  hash changes. Launching is the ROM library's (`irori_engines::play::launch_plan`).
+  Covers come from the server's `/assets/romm/resources/`, which RomM serves without
+  sign-in.
 - **Fix dialogs.** `irori_ui::save_conflict::resolve_launch_error` also turns
   `EngineMissing` and `BiosMissing` into dialogs with a fix (install and play, use the
   default version, choose the BIOS folder). Every place that starts a game already

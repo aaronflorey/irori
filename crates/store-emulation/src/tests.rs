@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use irori_core::{AppSettings, GameSettings, LaunchEnvironment, LaunchRequest, OpContext};
+use irori_engines::{BiosMissing, EngineMissing};
 use once_cell::sync::Lazy;
 
 use super::*;
