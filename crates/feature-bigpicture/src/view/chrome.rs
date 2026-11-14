@@ -344,7 +344,7 @@ impl BigPictureView {
         }
         match (self.tab, self.library.focus) {
             (Tab::Library, LibraryFocus::Chips(ix)) => {
-                let search = Chip::ALL.get(ix) == Some(&Chip::Search);
+                let search = self.chips().get(ix) == Some(&Chip::Search);
                 out.push(one(
                     Confirm,
                     if search {

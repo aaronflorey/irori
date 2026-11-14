@@ -1132,6 +1132,9 @@ Microsoft's approval page (`irori_manage::login`).
   the springs that follow the focus scroll and nothing passes an end. Its tests run the
   travel through each layout's offset. Lists that scroll a row at a time stop at their
   end (`layout::end_scroll`).
+- The Library tab's System chip (`Chip::System`, `LibraryFilter::system`) appears only
+  when a game has a system and cycles through the library's systems in the catalog's
+  order, then "Any system"; hidden games count only while they aren't locked.
 - The Library's search field sits outside the `BigPicture` key context
   (`SEARCH_CONTEXT`), so letters bound there (M, Space) reach the field.
 - **In-game overlay** (`overlay/`, beta, every system, `iroriOverlay.enabled`): Guide while a

@@ -67,9 +67,9 @@ use crate::layout::home::{Dir, grid_move, wall_step};
 use crate::layout::wheel::{WheelTravel, WheelView};
 use crate::layout::{GridStep, HomeLayout, Metrics, grid_step};
 use crate::model::{
-    Chip, GameAction, GameState, LibraryFilter, PageRow, Row, Show, StatusFilter, build_rows,
-    cover_action, cycle, disabled_reason, install_platforms, library_games, main_action, page_rows,
-    show_options,
+    Chip, ChipOptions, GameAction, GameState, LibraryFilter, PageRow, Row, StatusFilter,
+    build_rows, chip_options, cover_action, cycle, disabled_reason, install_platforms,
+    library_games, main_action, page_rows,
 };
 use crate::theme::ShelfKind;
 use irori_services::{LibrarySnapshot, UserData};
@@ -170,9 +170,10 @@ pub struct BigPictureView {
     overlay: Option<Overlay>,
     rows: Vec<Row>,
     rows_key: Option<(u64, usize, u32, Vec<ShelfKind>)>,
-    /// The Library tab's Show choices, per library revision and user data:
-    /// working them out reads every game, too much for each typed letter.
-    show_options: Option<(ShowKey, Rc<Vec<Show>>)>,
+    /// The Library tab's chip choices (Show, System), per library revision
+    /// and user data: working them out reads every game, too much for each
+    /// typed letter.
+    chip_options: Option<(ShowKey, Rc<ChipOptions>)>,
     show_option_computes: usize,
     grid: FocusGrid,
     library: LibraryTab,
@@ -320,7 +321,7 @@ impl BigPictureView {
             },
             wheel: WheelTravel::default(),
             hovered_cover: None,
-            show_options: None,
+            chip_options: None,
             show_option_computes: 0,
             pending: HashSet::new(),
             power: Vec::new(),
@@ -467,11 +468,19 @@ impl BigPictureView {
             }
         }
 
-        let options = self.show_options(&snapshot, &user);
+        let options = self.chip_options(&snapshot, &user);
         let lib = &mut self.library;
         lib.filter.query = lib.search.read(cx).value().trim().to_string();
-        if !options.contains(&lib.filter.show) {
+        if !options.show.contains(&lib.filter.show) {
             lib.filter.show = Default::default();
+        }
+        if lib
+            .filter
+            .system
+            .as_ref()
+            .is_some_and(|s| !options.systems.contains(s))
+        {
+            lib.filter.system = None;
         }
         // Only a deleted category gives way; others coming or going don't.
         lib.filter.category = crate::model::live_category(&user, &lib.filter);
@@ -490,21 +499,33 @@ impl BigPictureView {
         }
     }
 
-    /// The Library tab's Show choices for this library.
-    fn show_options(&mut self, snapshot: &LibrarySnapshot, user: &Arc<UserData>) -> Rc<Vec<Show>> {
+    /// The Library tab's chip choices for this library.
+    fn chip_options(
+        &mut self,
+        snapshot: &LibrarySnapshot,
+        user: &Arc<UserData>,
+    ) -> Rc<ChipOptions> {
         let key = (snapshot.revision, Arc::as_ptr(user) as usize);
-        if let Some((k, options)) = &self.show_options
+        if let Some((k, options)) = &self.chip_options
             && *k == key
         {
             return options.clone();
         }
-        let options = Rc::new(show_options(snapshot, user));
-        self.show_options = Some((key, options.clone()));
+        let options = Rc::new(chip_options(snapshot, user));
+        self.chip_options = Some((key, options.clone()));
         self.show_option_computes += 1;
         options
     }
 
-    /// How many times the Show choices were worked out.
+    /// The Library tab's chips, as last refreshed.
+    fn chips(&self) -> Vec<Chip> {
+        self.chip_options.as_ref().map_or_else(
+            || Chip::shown(&ChipOptions::default()),
+            |(_, o)| Chip::shown(o),
+        )
+    }
+
+    /// How many times the chip choices were worked out.
     #[cfg(test)]
     pub(crate) fn show_option_computes(&self) -> usize {
         self.show_option_computes
@@ -638,12 +659,13 @@ impl BigPictureView {
                     self.set_library_focus(LibraryFocus::Chips(chip.saturating_sub(1)), cx)
                 }
                 GamepadInput::Right => self.set_library_focus(
-                    LibraryFocus::Chips((chip + 1).min(Chip::ALL.len() - 1)),
+                    LibraryFocus::Chips((chip + 1).min(self.chips().len() - 1)),
                     cx,
                 ),
                 GamepadInput::Down if len > 0 => self.set_library_focus(LibraryFocus::Grid, cx),
                 GamepadInput::Confirm | GamepadInput::Alt => {
-                    self.activate_chip(Chip::ALL[chip.min(Chip::ALL.len() - 1)], window, cx)
+                    let chips = self.chips();
+                    self.activate_chip(chips[chip.min(chips.len() - 1)], window, cx)
                 }
                 GamepadInput::Back if len > 0 => self.set_library_focus(LibraryFocus::Grid, cx),
                 GamepadInput::Back => self.set_tab(Tab::Home, cx),
@@ -698,16 +720,16 @@ impl BigPictureView {
     /// search field.
     fn activate_chip(&mut self, chip: Chip, window: &mut Window, cx: &mut Context<Self>) {
         self.library.focus =
-            LibraryFocus::Chips(Chip::ALL.iter().position(|c| *c == chip).unwrap_or(0));
+            LibraryFocus::Chips(self.chips().iter().position(|c| *c == chip).unwrap_or(0));
         match chip {
             Chip::Show => {
                 let (snapshot, user) = {
                     let lib = models(cx).library.read(cx);
                     (lib.snapshot.clone(), lib.user.clone())
                 };
-                let options = self.show_options(&snapshot, &user);
+                let options = self.chip_options(&snapshot, &user);
                 let filter = &mut self.library.filter;
-                filter.show = cycle(&options, filter.show);
+                filter.show = cycle(&options.show, filter.show);
             }
             Chip::Sort => {
                 let filter = &mut self.library.filter;
@@ -721,6 +743,15 @@ impl BigPictureView {
                 let user = models(cx).library.read(cx).user.clone();
                 let filter = &mut self.library.filter;
                 filter.category = crate::model::next_category(&user, filter.category.as_ref());
+            }
+            Chip::System => {
+                let systems = self
+                    .chip_options
+                    .as_ref()
+                    .map(|(_, o)| o.systems.clone())
+                    .unwrap_or_default();
+                let filter = &mut self.library.filter;
+                filter.system = crate::model::next_system(&systems, filter.system.as_deref());
             }
             Chip::Search => {
                 self.library.searching = true;
@@ -741,7 +772,7 @@ impl BigPictureView {
         self.library.searching = false;
         self.focus.focus(window, cx);
         self.library.focus = if self.library.games.is_empty() {
-            LibraryFocus::Chips(Chip::ALL.len() - 1)
+            LibraryFocus::Chips(self.chips().len() - 1)
         } else {
             LibraryFocus::Grid
         };

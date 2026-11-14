@@ -3,7 +3,7 @@
 //! over snapshots so they are tested without a window.
 
 use std::cmp::Reverse;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::sync::Arc;
 
@@ -283,17 +283,27 @@ pub enum Chip {
     Sort,
     Status,
     Category,
+    System,
     Search,
 }
 
 impl Chip {
-    pub const ALL: [Chip; 5] = [
+    pub const ALL: [Chip; 6] = [
         Chip::Show,
         Chip::Sort,
         Chip::Status,
         Chip::Category,
+        Chip::System,
         Chip::Search,
     ];
+
+    /// The chips shown for `options`: System only when a game has one.
+    pub fn shown(options: &ChipOptions) -> Vec<Chip> {
+        Chip::ALL
+            .into_iter()
+            .filter(|c| *c != Chip::System || !options.systems.is_empty())
+            .collect()
+    }
 
     pub fn label(self) -> SharedString {
         t(match self {
@@ -301,6 +311,7 @@ impl Chip {
             Chip::Sort => "bigpicture.chip.sort",
             Chip::Status => "bigpicture.chip.status",
             Chip::Category => "bigpicture.chip.category",
+            Chip::System => "bigpicture.chip.system",
             Chip::Search => "bigpicture.chip.search",
         })
     }
@@ -311,6 +322,7 @@ impl Chip {
             Chip::Sort => "bp-chip-sort",
             Chip::Status => "bp-chip-status",
             Chip::Category => "bp-chip-category",
+            Chip::System => "bp-chip-system",
             Chip::Search => "bp-chip-search",
         }
     }
@@ -325,6 +337,8 @@ pub struct LibraryFilter {
     /// Only the games of this category, of either kind. Kept by name or
     /// id, so it survives other categories coming, going or moving.
     pub category: Option<CategoryRef>,
+    /// Only the games of this system (`snes`, `psx`, …).
+    pub system: Option<String>,
     pub query: String,
 }
 
@@ -348,6 +362,44 @@ pub fn live_category(user: &UserData, filter: &LibraryFilter) -> Option<Category
         .category
         .clone()
         .filter(|c| user.category_name(c).is_some())
+}
+
+/// What the Library tab's chips offer for this library.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct ChipOptions {
+    pub show: Vec<Show>,
+    pub systems: Vec<String>,
+}
+
+pub fn chip_options(library: &LibrarySnapshot, user: &UserData) -> ChipOptions {
+    ChipOptions {
+        show: show_options(library, user),
+        systems: system_options(library, user),
+    }
+}
+
+/// The systems of the library's games, in the catalog's order. Hidden
+/// games count only while they aren't locked behind the PIN.
+pub fn system_options(library: &LibrarySnapshot, user: &UserData) -> Vec<String> {
+    let present: HashSet<&str> = library
+        .games
+        .iter()
+        .filter(|g| !library.hidden_locked || !user.hidden.contains(&g.id().key()))
+        .filter_map(|g| g.system.as_deref())
+        .collect();
+    irori_engines::systems::all()
+        .iter()
+        .filter(|s| present.contains(s.id.as_str()))
+        .map(|s| s.id.clone())
+        .collect()
+}
+
+/// The system after `current` in `systems`, then none ("Any") again.
+pub fn next_system(systems: &[String], current: Option<&str>) -> Option<String> {
+    match current.and_then(|c| systems.iter().position(|s| s == c)) {
+        None => systems.first().cloned(),
+        Some(ix) => systems.get(ix + 1).cloned(),
+    }
 }
 
 /// What the Show chip offers for this library: every game, favourites, each
@@ -414,6 +466,10 @@ pub fn library_games(
                     .category
                     .as_ref()
                     .is_none_or(|c| irori_ui::categories::in_entry(c, g, library, user, index))
+                && filter
+                    .system
+                    .as_deref()
+                    .is_none_or(|s| g.system.as_deref() == Some(s))
                 && {
                     let title = g.title.to_lowercase();
                     words.iter().all(|w| title.contains(w.as_str()))
@@ -1073,6 +1129,47 @@ mod tests {
                 &CategoryIndex::default()
             )
             .is_empty()
+        );
+    }
+
+    #[test]
+    fn the_system_chip_offers_the_library_systems_in_catalog_order() {
+        let rom = |app: &str, system: &str| {
+            let mut g = (*game(Runner::Emulation, app, true)).clone();
+            g.system = Some(system.into());
+            Arc::new(g)
+        };
+        let mut lib = LibrarySnapshot::default();
+        lib.games = vec![
+            rom("ff7", "psx"),
+            rom("metroid", "snes"),
+            rom("secret", "n64"),
+            game(Runner::Gog, "a", true),
+        ];
+        let mut user = UserData::default();
+        user.hidden.insert("emulation:secret".into());
+        assert_eq!(system_options(&lib, &user), ["snes", "n64", "psx"]);
+        lib.hidden_locked = true;
+        let systems = system_options(&lib, &user);
+        assert_eq!(systems, ["snes", "psx"]);
+        assert!(Chip::shown(&chip_options(&lib, &user)).contains(&Chip::System));
+        assert!(!Chip::shown(&ChipOptions::default()).contains(&Chip::System));
+
+        assert_eq!(next_system(&systems, None).as_deref(), Some("snes"));
+        assert_eq!(next_system(&systems, Some("snes")).as_deref(), Some("psx"));
+        assert_eq!(next_system(&systems, Some("psx")), None);
+        let filter = LibraryFilter {
+            system: Some("psx".into()),
+            ..Default::default()
+        };
+        assert_eq!(
+            titles(&library_games(
+                &lib,
+                &user,
+                &filter,
+                &CategoryIndex::default()
+            )),
+            vec!["FF7"]
         );
     }
 

@@ -37,6 +37,11 @@ impl BigPictureView {
                     .and_then(|c| user.category_name(c))
                     .map_or_else(|| t("bigpicture.category.any"), |n| n.to_owned().into())
             }
+            Chip::System => filter
+                .system
+                .as_deref()
+                .and_then(irori_engines::systems::get)
+                .map_or_else(|| t("bigpicture.system.any"), |s| s.short.clone().into()),
             Chip::Search if filter.query.is_empty() => SharedString::new_static("—"),
             Chip::Search => SharedString::from(filter.query.clone()),
         }
@@ -124,7 +129,8 @@ impl BigPictureView {
         window: &mut Window,
         cx: &mut Context<Self>,
     ) -> AnyElement {
-        let chips: Vec<AnyElement> = Chip::ALL
+        let chips: Vec<AnyElement> = self
+            .chips()
             .into_iter()
             .enumerate()
             .map(|(ix, chip)| self.render_chip(ix, chip, c, cx))

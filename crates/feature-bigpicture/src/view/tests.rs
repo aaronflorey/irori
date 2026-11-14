@@ -265,7 +265,7 @@ fn home_library_page_and_overlays_follow_keyboard_and_gamepad(cx: &mut TestAppCo
     cx.simulate_keystrokes(handle, "up right right right right enter");
     cx.read(|cx| assert!(view.read(cx).library.searching));
     // The library revision and user data the Show choices were read for.
-    let show_key = |v: &BigPictureView| v.show_options.as_ref().map(|(key, _)| *key);
+    let show_key = |v: &BigPictureView| v.chip_options.as_ref().map(|(key, _)| *key);
     let (computes, key) = cx.read(|cx| {
         let v = view.read(cx);
         (v.show_option_computes(), show_key(v))
