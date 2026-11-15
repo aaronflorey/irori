@@ -13,8 +13,8 @@ use irori_core::{
     AppSettings, Event, GameId, GameStatus, Notice, Runner, StatusKind, StoreAccount, UserInfo,
 };
 use irori_services::{
-    AppUpdateStatus, CategoryIndex, ComponentReport, DownloadQueueSnapshot, LibrarySnapshot,
-    UserData,
+    AppUpdateStatus, CategoryIndex, ComponentReport, DownloadQueueSnapshot, EngineIcons,
+    LibrarySnapshot, UserData,
 };
 use tokio::sync::broadcast::error::{RecvError, TryRecvError};
 
@@ -28,6 +28,10 @@ pub struct LibraryModel {
     /// The games and counts of every category, worked out when the library,
     /// the user data, HowLongToBeat times or the day change.
     pub categories: Arc<CategoryIndex>,
+    /// The emulator logos for the covers of ROM games. Worked out after the
+    /// library or the emulator choices change, so they trail the snapshot.
+    pub engine_icons: Arc<EngineIcons>,
+    engine_icons_generation: u64,
     /// A store refresh is in progress.
     pub refreshing: bool,
 }
@@ -248,6 +252,8 @@ pub(crate) fn install(cx: &mut App) {
         user,
         updates: b.updates(),
         categories,
+        engine_icons: Arc::default(),
+        engine_icons_generation: 0,
         refreshing: false,
     });
     let statuses = cx.new(|_| StatusModel {
@@ -293,6 +299,7 @@ pub(crate) fn install(cx: &mut App) {
         app_update,
         components,
     });
+    refresh_engine_icons(cx);
     spawn_pump(cx);
 }
 
@@ -472,6 +479,9 @@ fn apply(batch: Vec<Event>, resync: bool, cx: &mut App) {
             }
         });
     }
+    if library || settings || changed_game.is_some() {
+        refresh_engine_icons(cx);
+    }
     if settings || changed_game.is_some() {
         let app = b.settings.app();
         m.settings.update(cx, |s, cx| {
@@ -483,6 +493,28 @@ fn apply(batch: Vec<Event>, resync: bool, cx: &mut App) {
             cx.notify();
         });
     }
+}
+
+/// Works out the emulator logos off the UI thread. Answers can finish out of
+/// order, so only the latest request's counts.
+fn refresh_engine_icons(cx: &mut App) {
+    let library = models(cx).library.clone();
+    let generation = library.update(cx, |l, _| {
+        l.engine_icons_generation += 1;
+        l.engine_icons_generation
+    });
+    let b = backend(cx);
+    let task = crate::state::run_infallible(cx, async move { b.engine_icons().await });
+    cx.spawn(async move |cx| {
+        let Some(icons) = task.await else { return };
+        library.update(cx, |l, cx| {
+            if l.engine_icons_generation == generation && *l.engine_icons != icons {
+                l.engine_icons = Arc::new(icons);
+                cx.notify();
+            }
+        });
+    })
+    .detach();
 }
 
 /// Mark the library as refreshing while `refresh_all` runs.

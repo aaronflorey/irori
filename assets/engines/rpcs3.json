@@ -3,6 +3,7 @@
   "name": "RPCS3",
   "license": "GPL-2.0-only",
   "homepage": "https://rpcs3.net",
+  "icon": "https://raw.githubusercontent.com/RPCS3/rpcs3/master/rpcs3/rpcs3.png",
   "kind": "standalone",
   "systems": [
     "ps3"

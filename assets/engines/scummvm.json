@@ -3,6 +3,7 @@
   "name": "ScummVM",
   "license": "GPL-3.0-or-later",
   "homepage": "https://www.scummvm.org",
+  "icon": "https://raw.githubusercontent.com/scummvm/scummvm/master/dists/android/store/scummvm_icon_512.png",
   "kind": "scummvm",
   "systems": [
     "scummvm"

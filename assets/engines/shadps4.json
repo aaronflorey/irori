@@ -3,6 +3,7 @@
   "name": "shadPS4",
   "license": "GPL-2.0-or-later",
   "homepage": "https://shadps4.net",
+  "icon": "https://raw.githubusercontent.com/shadps4-emu/shadPS4/main/.github/shadps4.png",
   "kind": "standalone",
   "systems": [
     "ps4"

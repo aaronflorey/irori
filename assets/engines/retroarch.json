@@ -3,6 +3,7 @@
   "name": "RetroArch",
   "license": "GPL-3.0-or-later",
   "homepage": "https://www.retroarch.com",
+  "icon": "https://raw.githubusercontent.com/libretro/RetroArch/master/media/ico_src/icon256.png",
   "kind": "retroarch",
   "systems": ["nes", "snes", "n64", "gb", "gbc", "gba", "nds", "sms", "genesis", "gamegear", "segacd", "pce", "psx", "psp"],
   "sources": [

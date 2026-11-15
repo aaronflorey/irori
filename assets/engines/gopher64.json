@@ -3,6 +3,7 @@
   "name": "Gopher64",
   "license": "GPL-3.0",
   "homepage": "https://gopher64.com",
+  "icon": "https://raw.githubusercontent.com/gopher64/gopher64/main/data/icon/gopher64_256x256.png",
   "kind": "standalone",
   "systems": [
     "n64"

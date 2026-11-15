@@ -267,6 +267,11 @@ pub struct EngineManifest {
     pub license: String,
     #[serde(default)]
     pub homepage: String,
+    /// Address of a PNG of the project's logo, on the project's own server.
+    /// Irori shows it on the covers of the games the engine plays; it is
+    /// fetched on demand and never bundled.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<String>,
     #[serde(default)]
     pub kind: EngineKind,
     /// Systems the engine plays (ids from the systems catalog).

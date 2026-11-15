@@ -3,6 +3,7 @@
   "name": "PPSSPP",
   "license": "GPL-2.0-or-later",
   "homepage": "https://www.ppsspp.org",
+  "icon": "https://raw.githubusercontent.com/hrydgard/ppsspp/master/icons/hicolor/256x256/apps/ppsspp.png",
   "kind": "standalone",
   "systems": [
     "psp"

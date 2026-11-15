@@ -3,6 +3,7 @@
   "name": "M64Py",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/mupen64plus/mupen64plus-ui-python",
+  "icon": "https://raw.githubusercontent.com/mupen64plus/mupen64plus-ui-python/master/src/m64py/ui/images/logo.png",
   "kind": "standalone",
   "systems": [
     "n64"

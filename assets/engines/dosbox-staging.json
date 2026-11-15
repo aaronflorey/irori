@@ -3,6 +3,7 @@
   "name": "DOSBox Staging",
   "license": "GPL-2.0-or-later",
   "homepage": "https://www.dosbox-staging.org",
+  "icon": "https://raw.githubusercontent.com/dosbox-staging/dosbox-staging/main/extras/icons/png/icon_256.png",
   "kind": "dosbox",
   "systems": [
     "dos"

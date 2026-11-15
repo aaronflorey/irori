@@ -3,6 +3,7 @@
   "name": "Azahar",
   "license": "GPL-2.0-or-later",
   "homepage": "https://azahar-emu.org",
+  "icon": "https://raw.githubusercontent.com/azahar-emu/azahar/master/dist/azahar.png",
   "kind": "standalone",
   "systems": [
     "3ds"

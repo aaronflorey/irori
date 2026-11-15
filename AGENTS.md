@@ -1175,6 +1175,13 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   versions are listed. The only per-engine code is the `kind` match in
   `crates/engines/src/launch.rs` (RetroArch cores, DOSBox, ScummVM, MAME, relinkers). Users may
   override a manifest with `<config>/engines/<id>.json` (merge patch).
+- **Cover logos.** A manifest's optional `icon` is the address of a PNG of the project's
+  logo on the project's own server (an engine without one shows none). `GameCover` draws
+  it as a chip on the covers of ROM games at 7 rem or wider, fetched through the art
+  store and never bundled. `Backend::engine_icons` picks each game's emulator as a launch
+  would (the game's `iroriEngine`, else the system's default) on a blocking thread, and
+  `LibraryModel::engine_icons` holds the answer, refreshed when the library, settings or
+  emulators change.
 - **Engines shipped:** RetroArch (12 cores), DuckStation, PPSSPP, Dolphin, ScummVM,
   DOSBox Staging, PCSX2, melonDS, mGBA, Azahar, Gopher64, MAME, Mupen64Plus, M64Py,
   DeSmuME and ePSXe (these five detected only; ePSXe is closed source), and the

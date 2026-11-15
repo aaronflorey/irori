@@ -12,6 +12,7 @@ use gpui_kit::{
 use irori_core::GameInfo;
 
 use crate::art::{Art, art_store};
+use crate::models::models;
 use crate::motion::fade_in;
 
 /// What there is to show for a piece of art right now.
@@ -148,6 +149,36 @@ pub fn physical_width(width: Rems, window: &Window) -> u32 {
     (logical * window.scale_factor()).ceil() as u32
 }
 
+/// Covers narrower than this (rows, sidebar, download lists) have no room for
+/// the emulator's logo.
+const ENGINE_LOGO_MIN_REM: f32 = 7.;
+
+/// The logo of the emulator a ROM game plays with, as a chip in a corner of
+/// the cover: at the bottom of box art, at the top of a cover Irori draws
+/// itself, where the title sits at the foot.
+fn engine_logo(
+    url: &str,
+    cover_width: Rems,
+    top: bool,
+    window: &Window,
+    cx: &mut App,
+) -> Option<AnyElement> {
+    let size = rems((cover_width.0 * 0.2).clamp(1.5, 2.5));
+    let logo = art_img(url, physical_width(size, window), true, cx)?;
+    Some(
+        div()
+            .absolute()
+            .right_2()
+            .when_else(top, |d| d.top_2(), |d| d.bottom_2())
+            .size(size)
+            .p_1()
+            .rounded_md()
+            .bg(cx.theme().background.opacity(0.8))
+            .child(logo.size_full().object_fit(ObjectFit::Contain))
+            .into_any_element(),
+    )
+}
+
 /// A 2:3 cover tile. Pulses while its art loads; a game without cover art
 /// gets its title on a quiet wash instead.
 #[derive(IntoElement)]
@@ -190,16 +221,29 @@ impl RenderOnce for GameCover {
             ),
             None => (ArtImage::Missing, false),
         };
+        let engine_logo = (self.width.0 >= ENGINE_LOGO_MIN_REM)
+            .then(|| {
+                let url = models(cx)
+                    .library
+                    .read(cx)
+                    .engine_icons
+                    .get(&self.game.id())
+                    .cloned()?;
+                let top = !matches!(image, ArtImage::Ready(_));
+                engine_logo(&url, self.width, top, window, cx)
+            })
+            .flatten();
         let theme = cx.theme();
         let radius = self.radius.unwrap_or(theme.radius_lg);
         let base = div()
+            .relative()
             .w(self.width)
             .h(rems(self.width.0 * 1.5))
             .flex_shrink_0()
             .overflow_hidden()
             .rounded(radius)
             .bg(theme.muted);
-        match image {
+        let tile = match image {
             // Images are clipped to rectangles, so they carry the corners themselves.
             ArtImage::Ready(image) => base.child(art_arrival(
                 SharedString::from(format!("cover-in:{}", self.game.id().key())),
@@ -239,6 +283,7 @@ impl RenderOnce for GameCover {
                             .child(self.game.title.clone()),
                     ),
             ),
-        }
+        };
+        tile.children(engine_logo)
     }
 }

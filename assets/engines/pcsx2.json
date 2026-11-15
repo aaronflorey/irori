@@ -3,6 +3,7 @@
   "name": "PCSX2",
   "license": "GPL-3.0-or-later",
   "homepage": "https://pcsx2.net",
+  "icon": "https://raw.githubusercontent.com/PCSX2/pcsx2/master/bin/resources/icons/AppIconLarge.png",
   "kind": "standalone",
   "systems": [
     "ps2"

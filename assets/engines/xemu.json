@@ -3,6 +3,7 @@
   "name": "xemu",
   "license": "GPL-2.0-only",
   "homepage": "https://xemu.app",
+  "icon": "https://raw.githubusercontent.com/xemu-project/xemu/master/ui/icons/xemu_256x256.png",
   "kind": "standalone",
   "systems": [
     "xbox"

@@ -1007,3 +1007,54 @@ fn igdb_fills_store_gaps_only_while_on_and_after_the_users_choice() {
     assert_eq!(rt.block_on(b.igdb_status()).client_id, None);
     b.settings.update_app(|s| s.igdb = false);
 }
+
+#[test]
+fn rom_covers_show_the_logo_of_the_emulator_that_plays_them() {
+    use irori_core::GameId;
+    isolate_paths();
+    let rom = |app: &str, system: &str| {
+        Arc::new(
+            GameInfo {
+                runner: Some(Runner::Emulation),
+                app_name: app.into(),
+                title: app.into(),
+                system: Some(system.into()),
+                ..Default::default()
+            }
+            .finalize(),
+        )
+    };
+    let games = vec![
+        rom("icons-default", "psx"),
+        rom("icons-own", "psx"),
+        rom("icons-unknown", "psx"),
+    ];
+    let b = Backend::start_headless(|_, _| {
+        vec![
+            Arc::new(ListStore {
+                runner: Runner::Emulation,
+                games,
+            }),
+            ListStore::store(Runner::Gog, &[("icons-pc", "Icons: PC game")]),
+        ]
+    })
+    .unwrap();
+    b.settings
+        .update_app(|s| _ = s.system_engines.insert("psx".into(), "duckstation".into()));
+    let own = GameId::new(Runner::Emulation, "icons-own");
+    b.settings
+        .set_game_value(&own, "iroriEngine", Some("ppsspp".into()));
+    b.settings.set_game_value(
+        &GameId::new(Runner::Emulation, "icons-unknown"),
+        "iroriEngine",
+        Some("no-such-emulator".into()),
+    );
+    b.rebuild_library();
+
+    let icons = b.runtime().block_on(b.engine_icons());
+    let icon = |app: &str| icons.get(&GameId::new(Runner::Emulation, app));
+    assert!(icon("icons-default").unwrap().contains("duckstation"));
+    assert!(icon("icons-own").unwrap().contains("ppsspp"));
+    assert!(icon("icons-unknown").is_none());
+    assert!(icons.get(&GameId::new(Runner::Gog, "icons-pc")).is_none());
+}

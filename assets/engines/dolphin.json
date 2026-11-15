@@ -3,6 +3,7 @@
   "name": "Dolphin",
   "license": "GPL-2.0-or-later",
   "homepage": "https://dolphin-emu.org",
+  "icon": "https://raw.githubusercontent.com/dolphin-emu/dolphin/master/Data/dolphin-emu.png",
   "kind": "standalone",
   "systems": [
     "gamecube",

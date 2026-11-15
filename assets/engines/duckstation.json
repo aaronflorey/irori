@@ -3,6 +3,7 @@
   "name": "DuckStation",
   "license": "CC-BY-NC-ND-4.0",
   "homepage": "https://www.duckstation.org",
+  "icon": "https://raw.githubusercontent.com/stenzek/duckstation/master/scripts/appimage/org.duckstation.DuckStation.png",
   "kind": "standalone",
   "systems": [
     "psx"

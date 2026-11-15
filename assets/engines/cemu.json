@@ -3,6 +3,7 @@
   "name": "Cemu",
   "license": "MPL-2.0",
   "homepage": "https://cemu.info",
+  "icon": "https://raw.githubusercontent.com/cemu-project/Cemu/main/dist/linux/info.cemu.Cemu.png",
   "kind": "standalone",
   "systems": [
     "wiiu"
