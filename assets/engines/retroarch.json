@@ -5,7 +5,7 @@
   "homepage": "https://www.retroarch.com",
   "icon": "https://raw.githubusercontent.com/libretro/RetroArch/master/media/ico_src/icon256.png",
   "kind": "retroarch",
-  "systems": ["nes", "snes", "n64", "gb", "gbc", "gba", "nds", "sms", "genesis", "gamegear", "segacd", "pce", "psx", "psp"],
+  "systems": ["nes", "snes", "n64", "gb", "gbc", "gba", "nds", "sms", "genesis", "gamegear", "segacd", "pce", "psx", "psp", "dreamcast", "neogeocd"],
   "sources": [
     {
       "type": "buildbot",
@@ -66,6 +66,8 @@
     },
     { "id": "mednafen_pce_fast", "name": "Beetle PCE Fast", "license": "GPL-2.0", "systems": ["pce"] },
     { "id": "swanstation", "name": "SwanStation", "license": "GPL-3.0", "systems": ["psx"] },
-    { "id": "ppsspp", "name": "PPSSPP", "license": "GPL-2.0-or-later", "systems": ["psp"] }
+    { "id": "ppsspp", "name": "PPSSPP", "license": "GPL-2.0-or-later", "systems": ["psp"] },
+    { "id": "flycast", "name": "Flycast", "license": "GPL-2.0-only", "systems": ["dreamcast"] },
+    { "id": "neocd", "name": "NeoCD", "license": "LGPL-3.0", "systems": ["neogeocd"] }
   ]
 }

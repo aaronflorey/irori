@@ -117,6 +117,10 @@ pub const BUILT_IN: &[(&str, &str)] = &[
         "anyps5",
         include_str!("../../../assets/engines/anyps5.json"),
     ),
+    (
+        "vita3k",
+        include_str!("../../../assets/engines/vita3k.json"),
+    ),
 ];
 
 /// An engine choice as stored in settings: `duckstation`, or

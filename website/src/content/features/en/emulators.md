@@ -14,7 +14,7 @@ highlights:
     body: Irori scans them once, notices new files as they arrive, and never deletes a ROM.
   - title: Emulators from their projects
     body: Installed on request from each project’s own servers, side by side by version.
-  - title: Twelve RetroArch cores
+  - title: Fourteen RetroArch cores
     body: Missing cores are installed on the way when a game needs one.
   - title: BIOS checked, from your own files
     body: Irori finds the files a system needs in your folder, or on your RomM server, and tells you what is missing.
@@ -35,10 +35,10 @@ serial, take their real title from the game’s own `PARAM.SFO`, and PlayStation
 
 ## Emulators Irori can install
 
-RetroArch with twelve cores, **DuckStation**, **PPSSPP**, **Dolphin**, **ScummVM**,
+RetroArch with fourteen cores, **DuckStation**, **PPSSPP**, **Dolphin**, **ScummVM**,
 **DOSBox Staging**, **PCSX2**, **melonDS**, **mGBA**, **Azahar** and **Gopher64**. **MAME**,
 **Mupen64Plus**, **M64Py**, **DeSmuME** and **ePSXe** are detected when you have them. **Cemu**,
-**Eden**, **RPCS3**, **xemu**, **shadPS4** and **AnyPS5** are there too, marked experimental, and never become a system’s default while another emulator plays it.
+**Eden**, **RPCS3**, **xemu**, **shadPS4**, **Vita3K** and **AnyPS5** are there too, marked experimental, and never become a system’s default while another emulator plays it.
 
 Irori downloads emulators from the projects’ own servers when you ask, and never redistributes
 them. Versions sit side by side, so installing a new one changes nothing until you choose Update,

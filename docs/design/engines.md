@@ -130,7 +130,8 @@ Cores in P4.1, with the systems that recommend them first: Nestopia (NES, GPL-2.
 (GPL-3.0), Snes9x (SNES, **non-commercial**), bsnes (GPL-3.0), Mupen64Plus-Next (N64,
 GPL-2.0), Gambatte (GB/GBC, GPL-2.0), mGBA (GBA, MPL-2.0), melonDS DS (DS, GPL-3.0),
 Genesis Plus GX (Sega 8/16-bit and Mega-CD, **non-commercial**), Beetle PCE Fast (GPL-2.0),
-SwanStation (PS1, GPL-3.0), PPSSPP (GPL-2.0-or-later).
+SwanStation (PS1, GPL-3.0), PPSSPP (GPL-2.0-or-later), Flycast (Dreamcast, GPL-2.0)
+and NeoCD (Neo Geo CD, LGPL-3.0).
 
 P4.7 adds PCSX2 (PS2), melonDS and mGBA standalone, Azahar (3DS) and MAME (arcade), then
 the experimental engines Cemu (Wii U), RPCS3 (PS3), xemu (Xbox) and shadPS4 (PS4).
@@ -149,6 +150,7 @@ the experimental engines Cemu (Wii U), RPCS3 (PS3), xemu (Xbox) and shadPS4 (PS4
 | RPCS3 *(experimental)* | PS3 | Linux x64 AppImage from `RPCS3/rpcs3-binaries-linux`; macOS and Windows detected only | Flatpak, `PATH`, `RPCS3.app` | GPL-2.0-only |
 | xemu *(experimental)* | Xbox | GitHub releases (AppImage, macOS universal zip, Windows zip) | Flatpak, `PATH`, `xemu.app` | GPL-2.0-only |
 | shadPS4 *(experimental)* | PS4 | GitHub releases (SDL builds) | `PATH` | GPL-2.0-or-later |
+| Vita3K *(experimental)* | PS Vita | GitHub rolling release (AppImage, macOS dmg, Windows zip) | `PATH`, `Vita3K.app` | GPL-3.0-only |
 
 New systems: PlayStation 2 (BIOS required; its files have many names, so the catalog
 matches them by a name pattern and links them under their own names), Nintendo 3DS,

@@ -1182,10 +1182,10 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   would (the game's `iroriEngine`, else the system's default) on a blocking thread, and
   `LibraryModel::engine_icons` holds the answer, refreshed when the library, settings or
   emulators change.
-- **Engines shipped:** RetroArch (12 cores), DuckStation, PPSSPP, Dolphin, ScummVM,
+- **Engines shipped:** RetroArch (14 cores), DuckStation, PPSSPP, Dolphin, ScummVM,
   DOSBox Staging, PCSX2, melonDS, mGBA, Azahar, Gopher64, MAME, Mupen64Plus, M64Py,
   DeSmuME and ePSXe (these five detected only; ePSXe is closed source), and the
-  experimental Cemu, Eden, RPCS3, xemu, shadPS4 and AnyPS5 (never a system's default while
+  experimental Cemu, Eden, RPCS3, xemu, shadPS4, Vita3K and AnyPS5 (never a system's default while
   another engine plays it). Systems may be `folderOnly` (arcade zips, Xbox images) and
   folder games may name the file engines open (`folderMain`), the files naming them
   (`folderTitle`: PS5 `param.json`, PS3/PS4 `PARAM.SFO` through `irori_engines::sfo`)

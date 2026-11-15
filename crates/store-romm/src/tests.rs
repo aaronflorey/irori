@@ -494,5 +494,8 @@ fn picks_the_file_an_emulator_plays() {
     assert_eq!(main(&discs).as_deref(), Some("Game.m3u"));
     assert!(download_plan(&rom("snes", vec![file(1, "readme.txt")])).is_none());
     assert_eq!(system_of("genesis"), Some("genesis"));
+    assert_eq!(system_of("dc"), Some("dreamcast"));
+    assert_eq!(system_of("neo-geo-cd"), Some("neogeocd"));
+    assert_eq!(system_of("psvita"), Some("psvita"));
     assert_eq!(system_of("saturn"), None);
 }

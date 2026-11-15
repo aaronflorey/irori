@@ -611,6 +611,14 @@ fn maps_emulators_to_systems_and_engines() {
         ok("segacd", "retroarch:genesis_plus_gx")
     );
     assert_eq!(
+        target("libretro", "a.gdi", Some("flycast"), None),
+        ok("dreamcast", "retroarch:flycast")
+    );
+    assert_eq!(
+        target("libretro", "a.cue", Some("neocd"), None),
+        ok("neogeocd", "retroarch:neocd")
+    );
+    assert_eq!(
         target("libretro", "a.pce", Some("mednafen_pce_fast"), None),
         ok("pce", "retroarch:mednafen_pce_fast")
     );

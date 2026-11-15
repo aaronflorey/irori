@@ -108,6 +108,8 @@ fn core_system(core: &str, ext: &str) -> Option<&'static str> {
             "psx"
         }
         "ppsspp" => "psp",
+        "flycast" => "dreamcast",
+        "neocd" => "neogeocd",
         "dosbox_pure" | "dosbox_core" => "dos",
         "scummvm" => "scummvm",
         _ => return None,

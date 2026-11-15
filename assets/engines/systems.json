@@ -921,6 +921,87 @@
       "engines": [
         "anyps5"
       ]
+    },
+    {
+      "id": "dreamcast",
+      "name": "Dreamcast",
+      "short": "DC",
+      "maker": "Sega",
+      "year": 1998,
+      "libretro": "Sega - Dreamcast",
+      "colors": [
+        "#f2f2f2",
+        "#f26b1d"
+      ],
+      "extensions": [
+        "gdi",
+        "cdi",
+        "chd",
+        "cue",
+        "m3u"
+      ],
+      "discImages": true,
+      "multiDisc": true,
+      "folders": [
+        "dreamcast",
+        "dc",
+        "sega dreamcast"
+      ],
+      "engines": [
+        "retroarch:flycast"
+      ]
+    },
+    {
+      "id": "neogeocd",
+      "name": "Neo Geo CD",
+      "short": "NGCD",
+      "maker": "SNK",
+      "year": 1994,
+      "libretro": "SNK - Neo Geo CD",
+      "colors": [
+        "#1a1a1a",
+        "#d4af37"
+      ],
+      "extensions": [
+        "cue",
+        "chd"
+      ],
+      "discImages": true,
+      "folders": [
+        "neogeocd",
+        "neo geo cd",
+        "neogeo cd",
+        "neo-geo-cd"
+      ],
+      "engines": [
+        "retroarch:neocd"
+      ]
+    },
+    {
+      "id": "psvita",
+      "name": "PlayStation Vita",
+      "short": "Vita",
+      "maker": "Sony",
+      "year": 2011,
+      "libretro": "Sony - PlayStation Vita",
+      "colors": [
+        "#0a2a66",
+        "#4fa3ff"
+      ],
+      "extensions": [
+        "vpk",
+        "zip"
+      ],
+      "folders": [
+        "psvita",
+        "ps vita",
+        "vita",
+        "playstation vita"
+      ],
+      "folderOnly": true,
+      "engines": [
+        "vita3k"
+      ]
     }
   ]
 }
