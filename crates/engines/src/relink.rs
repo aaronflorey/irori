@@ -379,6 +379,7 @@ mod tests {
         let game = GameFile {
             path: root.join("eboot.bin"),
             system: "ps5".into(),
+            content_dir: None,
         };
         std::fs::write(&game.path, b"SCE\0encrypted").unwrap();
         let e = check(&manifest(&[]), &game).unwrap_err();
@@ -439,6 +440,7 @@ mod tests {
         let game = GameFile {
             path: folder.join("eboot.bin"),
             system: "ps5".into(),
+            content_dir: None,
         };
         let m = manifest(&[]);
 

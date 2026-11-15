@@ -1211,6 +1211,13 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   which); a folder the user filled themselves is never replaced. Only Eden has one
   (Switch firmware); its `prod.keys` and `title.keys` are ordinary optional BIOS files
   linked into `{data_dir}/keys`.
+- **Updates and DLC folder** (`irori_engines::content`): an engine's manifest may name its
+  `configDir` and a `contentFolder` (config file, ini section, array key), the list of
+  folders it reads updates and DLC from without installing them (Eden's External Content).
+  Before each launch the game's `GameFile::content_dir` is put in that list and the folder
+  Irori added for the previous game (remembered in the engine's Irori home) is taken out;
+  every other line of the file and every folder the user listed stays. Only RomM sets
+  `content_dir`, for ROMs that downloaded updates or DLC.
 - **Settings keys** are Irori-only: `iroriEngine`, `iroriEngineVersion`,
   `iroriEngineOptions` (merged per engine and option over the defaults),
   `iroriEngineOwnSettings`, `iroriSystemEngines`, `iroriRomFolders`, `iroriBiosFolder`.
@@ -1262,8 +1269,9 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   device id in `<config>/device-id` keeps one entry in RomM's device list per
   installation. Every ROM the account sees is cached for offline; only those of RomM
   platforms `irori_romm::system_of` maps to a system (RomM's universal slugs) are listed.
-  A download is the ROM's game files (not the files RomM files as manuals, patches, DLC
-  and other extras) through `irori-depot`, laid out as in the ROM's folder on the server,
+  A download is the ROM's game files (not the files RomM files as manuals, patches
+  and other extras; a system's `contentCategories`, Switch's `update` and `dlc`, are
+  downloaded too and recorded as `InstalledRecord::content`) through `irori-depot`, laid out as in the ROM's folder on the server,
   verified by RomM's SHA-1 when it has one, into `<install folder>/<RomM file name>/`.
   The emulator opens a playlist, else the first file with one of the system's
   extensions (in the catalog's order), else a zip when RetroArch is the system's default;

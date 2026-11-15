@@ -129,6 +129,11 @@ pub struct System {
     /// (`PS3_GAME`, `USRDIR`, `sce_sys`) and so never name the game.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub layout_folders: Vec<String>,
+    /// RomM file categories (`update`, `dlc`) whose files belong to a game of
+    /// this system and are downloaded with it, because its emulator reads
+    /// them from the game's folder.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub content_categories: Vec<String>,
     /// Files count as this system's games only inside one of its folders
     /// (arcade `.zip` sets, Xbox `.iso` images), never by extension alone.
     #[serde(default)]

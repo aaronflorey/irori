@@ -245,6 +245,18 @@ pub struct FirmwareSpec {
     pub dir: String,
 }
 
+/// Where an engine's config file lists the folders it reads updates and DLC
+/// from, an array of `path` entries in an ini file.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ContentFolderSpec {
+    /// The file name inside [`EngineManifest::config_dir`].
+    pub file: String,
+    pub section: String,
+    /// The array's key prefix: its entries are `<array>\<n>\path` and its
+    /// length `<array>\size`.
+    pub array: String,
+}
+
 /// Everything Irori knows about one engine.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -277,6 +289,14 @@ pub struct EngineManifest {
     /// `user` folder beside the program takes its place.
     #[serde(default)]
     pub data_dir: PerOs<Option<String>>,
+    /// Where the engine keeps its configuration file, per OS (as
+    /// [`EngineManifest::data_dir`], with `{xdg_config}` for the XDG config
+    /// folder; a Flatpak's sandbox or a portable `user/config` replace it).
+    #[serde(default)]
+    pub config_dir: PerOs<Option<String>>,
+    /// A folder of updates and DLC the engine reads, named in its config file.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub content_folder: Option<ContentFolderSpec>,
     /// System software installed into [`EngineManifest::data_dir`] before a
     /// launch, from the user's BIOS folder.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -319,6 +339,13 @@ impl EngineManifest {
                 "engine id {:?} must be lower-case letters, digits and dashes",
                 self.id
             );
+        }
+        if self.content_folder.is_some()
+            && self.config_dir.linux.is_none()
+            && self.config_dir.macos.is_none()
+            && self.config_dir.windows.is_none()
+        {
+            bail!("{}: contentFolder needs configDir", self.id);
         }
         if let Some(firmware) = &self.firmware {
             regex::Regex::new(&firmware.archive)

@@ -24,6 +24,7 @@
 pub mod archive;
 pub mod bios;
 pub mod cheevos;
+pub mod content;
 pub mod discovery;
 pub mod firmware;
 pub mod host;

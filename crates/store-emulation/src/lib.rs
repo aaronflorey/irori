@@ -587,6 +587,7 @@ impl Store for EmulationStore {
         let game = GameFile {
             path: entry.path,
             system: entry.system,
+            content_dir: None,
         };
         irori_engines::play::launch_plan(&self.bus, (self.settings)(), game, request, &ctx).await
     }

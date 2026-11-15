@@ -57,6 +57,15 @@ impl Rom {
         self.files.iter().filter(|f| f.is_game())
     }
 
+    /// The files of the given RomM categories (a game's updates and DLC).
+    pub fn files_of<'a>(&'a self, categories: &'a [String]) -> impl Iterator<Item = &'a RomFile> {
+        self.files.iter().filter(|f| {
+            f.category
+                .as_deref()
+                .is_some_and(|c| categories.iter().any(|w| w == c))
+        })
+    }
+
     /// Where `file` sits inside the ROM's folder (`/`-separated), as RomM
     /// names it in downloads: its name, or its path below the folder of a
     /// ROM with several files.

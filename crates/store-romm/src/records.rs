@@ -84,6 +84,8 @@ pub struct InstalledRecord {
     pub size: u64,
     /// The user keeps this version: no update checks.
     pub pinned_version: bool,
+    /// The folder also holds the game's updates and DLC.
+    pub content: bool,
 }
 
 impl InstalledRecord {

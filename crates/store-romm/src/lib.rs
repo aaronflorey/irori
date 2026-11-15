@@ -91,6 +91,8 @@ pub(crate) struct Download {
     /// sorted).
     pub files: Vec<(String, RomFile)>,
     pub main: Main,
+    /// Some of the files are updates or DLC.
+    pub content: bool,
 }
 
 pub(crate) enum Main {
@@ -120,10 +122,9 @@ impl Download {
 /// file to open among its game files.
 pub(crate) fn download_plan(rom: &Rom) -> Option<Download> {
     let system = systems::get(system_of(&rom.platform_slug)?)?;
-    let mut files = Vec::new();
-    for file in rom.game_files() {
-        // Names are sanitized per folder, as the ROM library's folders would
-        // hold them; anything that still leaves the folder drops the ROM.
+    // Names are sanitized per folder, as the ROM library's folders would
+    // hold them; anything that still leaves the folder drops the ROM.
+    let place_of = |file: &RomFile| -> Option<(String, RomFile)> {
         let place: Vec<String> = rom
             .path_in_rom(file)
             .split(['/', '\\'])
@@ -131,14 +132,24 @@ pub(crate) fn download_plan(rom: &Rom) -> Option<Download> {
             .map(irori_core::paths::sanitize)
             .collect();
         let place = irori_depot::path::normalize(&place.join("/")).ok()?;
-        files.push((place, file.clone()));
-    }
+        Some((place, file.clone()))
+    };
+    let mut files = rom.game_files().map(place_of).collect::<Option<Vec<_>>>()?;
     files.sort_by(|a, b| a.0.cmp(&b.0));
+    // The file the emulator opens is a game file, never an update.
     let main = main_file(system, &files)?;
+    let mut extras = rom
+        .files_of(&system.content_categories)
+        .map(place_of)
+        .collect::<Option<Vec<_>>>()?;
+    let content = !extras.is_empty();
+    files.append(&mut extras);
+    files.sort_by(|a, b| a.0.cmp(&b.0));
     Some(Download {
         system,
         files,
         main,
+        content,
     })
 }
 
@@ -659,24 +670,37 @@ impl Store for RommStore {
     async fn import(&self, app_name: &str, path: &Path, _platform: InstallPlatform) -> Result<()> {
         let (rom, download) = self.download_of(app_name)?;
         let mut size = 0;
-        for (place, _) in &download.files {
+        let mut places = Vec::new();
+        for (place, file) in &download.files {
             let found = irori_depot::path::join(path, place);
-            size += tokio::fs::metadata(&found)
-                .await
-                .with_context(|| format!("{place} is not in {}", path.display()))?
-                .len();
+            match tokio::fs::metadata(&found).await {
+                Ok(meta) => {
+                    size += meta.len();
+                    places.push(place.clone());
+                }
+                // Updates and DLC are optional extras of a folder.
+                Err(_) if !file.is_game() => {}
+                Err(e) => {
+                    return Err(e).with_context(|| format!("{place} is not in {}", path.display()));
+                }
+            }
         }
+        let content = download
+            .files
+            .iter()
+            .any(|(place, file)| !file.is_game() && places.contains(place));
         let main = main_on_disk(&download.main, path).await?;
         let record = InstalledRecord {
             title: rom.title().to_string(),
             install_path: path.to_string_lossy().into_owned(),
             file: main,
-            files: download.files.into_iter().map(|(place, _)| place).collect(),
+            files: places,
             system: download.system.id.clone(),
             // Unknown until downloaded by Irori: the next check offers it.
             revision: String::new(),
             size,
             pinned_version: false,
+            content,
         };
         self.update_installed(|m| {
             m.insert(app_name.to_string(), record);
@@ -726,9 +750,11 @@ impl Store for RommStore {
         {
             self.fetch_firmware(&rom, system, &ctx).await;
         }
+        let content_dir = record.content.then(|| PathBuf::from(&record.install_path));
         let game = GameFile {
             path: record.path(),
             system: record.system,
+            content_dir,
         };
         irori_engines::play::launch_plan(&self.bus, (self.settings)(), game, request, &ctx).await
     }

@@ -193,6 +193,7 @@ impl RommStore {
             revision: download.revision(),
             size,
             pinned_version: previous.is_some_and(|p| p.pinned_version),
+            content: download.content,
         };
         self.update_installed(|m| {
             m.insert(app.to_string(), record);

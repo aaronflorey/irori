@@ -52,6 +52,16 @@
     "macos": "{xdg_data}/eden",
     "windows": "{app_data}/eden"
   },
+  "configDir": {
+    "linux": "{xdg_config}/eden",
+    "macos": "{xdg_config}/eden",
+    "windows": "{app_data}/eden/config"
+  },
+  "contentFolder": {
+    "file": "qt-config.ini",
+    "section": "UI",
+    "array": "Paths\\external_content_dirs"
+  },
   "biosDir": {
     "linux": "{data_dir}/keys",
     "macos": "{data_dir}/keys",

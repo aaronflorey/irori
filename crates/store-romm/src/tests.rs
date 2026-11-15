@@ -81,6 +81,20 @@ fn rom_json(server: &Server) -> serde_json::Value {
             ]
         },
         {
+            "id": 12,
+            "name": "Zelda",
+            "fs_name_no_ext": "Zelda",
+            "full_path": "roms/switch/Zelda",
+            "platform_slug": "switch",
+            "platform_display_name": "Nintendo Switch",
+            "files": [
+                file_json(120, "roms/switch/Zelda", "Zelda [base].nsp", None),
+                file_json(121, "roms/switch/Zelda/update", "Zelda [v65536].nsp", Some("update")),
+                file_json(122, "roms/switch/Zelda/dlc", "Zelda DLC.nsp", Some("dlc")),
+                file_json(123, "roms/switch/Zelda/manual", "Manual.pdf", Some("manual")),
+            ]
+        },
+        {
             "id": 11,
             "name": "Doom",
             "fs_name_no_ext": "Doom",
@@ -213,7 +227,7 @@ async fn lists_the_roms_of_systems_irori_plays() {
     let s = signed_in(dir.path(), &server).await;
 
     let games = s.games();
-    assert_eq!(games.len(), 4);
+    assert_eq!(games.len(), 5);
     assert!(s.game("9").is_none(), "Saturn games aren't playable yet");
     let metroid = s.game("7").unwrap();
     assert_eq!(metroid.title, "Super Metroid");
@@ -295,7 +309,7 @@ async fn offers_and_applies_updates_when_the_file_changes() {
     // Everything survives a restart.
     let again = store(dir.path());
     again.init().await.unwrap();
-    assert_eq!(again.games().len(), 4);
+    assert_eq!(again.games().len(), 5);
     assert!(again.game("7").unwrap().is_installed);
 
     let install_dir = PathBuf::from(&record.install_path);
@@ -409,6 +423,34 @@ async fn a_game_installs_when_romm_refuses_its_firmware() {
         }
     }
     assert_eq!(told, 1);
+}
+
+#[tokio::test]
+async fn downloads_a_switch_games_updates_and_dlc_with_it() {
+    let (server, _) = start_server();
+    let dir = test_dir();
+    let s = signed_in(dir.path(), &server).await;
+    assert!(matches!(install(&s, "12").await, Outcome::Done));
+
+    let zelda = dir.path().join("Games/Zelda");
+    for place in [
+        "Zelda [base].nsp",
+        "update/Zelda [v65536].nsp",
+        "dlc/Zelda DLC.nsp",
+    ] {
+        assert!(zelda.join(place).is_file(), "{place}");
+    }
+    assert!(!zelda.join("manual").exists(), "extras stay on the server");
+    let record = s.record("12").unwrap();
+    assert!(record.content);
+    assert_eq!(
+        record.path(),
+        zelda.join("Zelda [base].nsp"),
+        "the emulator opens the game, not an update"
+    );
+    // A game with nothing but its own files has no content folder.
+    assert!(matches!(install(&s, "10").await, Outcome::Done));
+    assert!(!s.record("10").unwrap().content);
 }
 
 #[test]

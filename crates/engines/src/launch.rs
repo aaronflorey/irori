@@ -189,6 +189,9 @@ pub struct GameFile {
     /// for folder games, the game's folder.
     pub path: PathBuf,
     pub system: String,
+    /// A folder holding this game's updates and DLC, for an engine that reads
+    /// them from a folder it is told about (Eden).
+    pub content_dir: Option<PathBuf>,
 }
 
 /// Everything [`command`] needs.
@@ -239,6 +242,16 @@ pub fn command(input: &LaunchInput) -> Result<CommandSpec> {
         engine_dir: engine_dir.display().to_string(),
         data_dir: String::new(),
         app_data: dirs::data_dir().unwrap_or_default().display().to_string(),
+        xdg_config: std::env::var("XDG_CONFIG_HOME")
+            .ok()
+            .filter(|v| !v.is_empty())
+            .unwrap_or_else(|| {
+                dirs::home_dir()
+                    .unwrap_or_default()
+                    .join(".config")
+                    .display()
+                    .to_string()
+            }),
         xdg_data: std::env::var("XDG_DATA_HOME")
             .ok()
             .filter(|v| !v.is_empty())
@@ -251,21 +264,26 @@ pub fn command(input: &LaunchInput) -> Result<CommandSpec> {
             }),
     };
 
-    let data_dir = manifest.data_dir.get(os).as_deref().map(|template| {
-        let own = PathBuf::from(vars.expand(template));
-        let portable = engine_dir.join("user");
-        match (&installation.flatpak, installation.origin) {
-            // A Flatpak keeps its XDG data folder inside its own sandbox.
-            (Some(id), Origin::Flatpak) => dirs::home_dir()
-                .unwrap_or_default()
-                .join(".var/app")
-                .join(id)
-                .join("data")
-                .join(own.file_name().unwrap_or_default()),
-            _ if portable.is_dir() => portable,
-            _ => own,
-        }
-    });
+    // An engine's own folders: its template, but inside the sandbox for a
+    // Flatpak and below a `user` folder beside the program for a portable one.
+    let own_folder = |template: &Option<String>, sandbox: &str, portable: &str| {
+        template.as_deref().map(|template| {
+            let own = PathBuf::from(vars.expand(template));
+            let portable = engine_dir.join("user").join(portable);
+            match (&installation.flatpak, installation.origin) {
+                (Some(id), Origin::Flatpak) => dirs::home_dir()
+                    .unwrap_or_default()
+                    .join(".var/app")
+                    .join(id)
+                    .join(sandbox)
+                    .join(own.file_name().unwrap_or_default()),
+                _ if engine_dir.join("user").is_dir() => portable,
+                _ => own,
+            }
+        })
+    };
+    let data_dir = own_folder(manifest.data_dir.get(os), "data", "");
+    let config_dir = own_folder(manifest.config_dir.get(os), "config", "config");
     if let Some(dir) = &data_dir {
         vars.data_dir = dir.display().to_string();
     }
@@ -321,6 +339,14 @@ pub fn command(input: &LaunchInput) -> Result<CommandSpec> {
                 {
                     crate::bios::link_into(system, bios, &dir)?;
                     shared.push(bios.root.clone());
+                }
+            }
+            if let (Some(spec), Some(dir)) = (&manifest.content_folder, &config_dir) {
+                let marker = crate::dirs::home(&manifest.id).join("content-folder");
+                if let Err(e) =
+                    crate::content::sync(spec, dir, &marker, game.content_dir.as_deref())
+                {
+                    tracing::warn!("{} updates and DLC folder: {e:#}", manifest.name);
                 }
             }
             if let (Some(spec), Some(dir)) = (&manifest.firmware, &data_dir)
@@ -463,6 +489,7 @@ struct Vars {
     data_dir: String,
     app_data: String,
     xdg_data: String,
+    xdg_config: String,
 }
 
 impl Vars {
@@ -474,6 +501,7 @@ impl Vars {
             .replace("{data_dir}", &self.data_dir)
             .replace("{app_data}", &self.app_data)
             .replace("{xdg_data}", &self.xdg_data)
+            .replace("{xdg_config}", &self.xdg_config)
             .replace("{home}", &self.home)
     }
 }
@@ -593,12 +621,14 @@ mod tests {
                 md5: "00".into(),
             }],
         };
+        let zelda = root.join("Zelda");
         command(&LaunchInput {
             manifest: &m,
             installation: &inst,
             game: &GameFile {
-                path: rom,
+                path: rom.clone(),
                 system: "switch".into(),
+                content_dir: Some(zelda.clone()),
             },
             core: None,
             values: &values,
@@ -607,6 +637,12 @@ mod tests {
         })
         .unwrap();
         let user = install.join("user");
+        // The game's folder of updates and DLC is in Eden's config for this launch.
+        let config = std::fs::read_to_string(user.join("config/qt-config.ini")).unwrap();
+        assert!(config.contains(&format!(
+            "Paths\\external_content_dirs\\1\\path={}",
+            zelda.display().to_string().replace('\\', "/")
+        )));
         assert_eq!(
             std::fs::read(user.join("keys/prod.keys")).unwrap(),
             b"master_key_00 = 00"
@@ -660,6 +696,7 @@ mod tests {
             game: &GameFile {
                 path: rom.clone(),
                 system: "psx".into(),
+                content_dir: None,
             },
             core: None,
             values: &values,
@@ -684,6 +721,7 @@ mod tests {
             game: &GameFile {
                 path: rom.clone(),
                 system: "psx".into(),
+                content_dir: None,
             },
             core: None,
             values: &off,
@@ -706,6 +744,7 @@ mod tests {
         let game = GameFile {
             path: rom.clone(),
             system: "snes".into(),
+            content_dir: None,
         };
         let input = LaunchInput {
             manifest: &m,
@@ -767,6 +806,7 @@ mod tests {
             game: &GameFile {
                 path: exe.clone(),
                 system: "dos".into(),
+                content_dir: None,
             },
             core: None,
             values: &values,
@@ -790,6 +830,7 @@ mod tests {
             game: &GameFile {
                 path: game.clone(),
                 system: "scummvm".into(),
+                content_dir: None,
             },
             core: None,
             values: &values,
@@ -822,6 +863,7 @@ mod tests {
             game: &GameFile {
                 path: rom.to_path_buf(),
                 system: system.into(),
+                content_dir: None,
             },
             core: None,
             values: &values,
@@ -923,6 +965,7 @@ mod tests {
             data_dir: String::new(),
             app_data: String::new(),
             xdg_data: String::new(),
+            xdg_config: String::new(),
         };
         let mut out = Vec::new();
         expand_args(&template, &BTreeMap::new(), &vars, &mut out);

@@ -102,6 +102,8 @@ executed; it is data.
 | `options` | `id`, `kind` (`toggle`, `choice`, `text`), `default`, `advanced`, `choices`, and **one** visibility rule, `visibleWhen` (`hosts`, and/or `option` + `is`). Labels and help are translation keys derived from the id (`manage.engines.option.<id>.label` / `.help`), shared by every engine with that option. |
 | `biosDir` | Per OS, where the engine looks for BIOS files; Irori links the user's files there before a launch. RetroArch has none because Irori sets its `system_directory`. |
 | `dataDir` | Per OS, the engine's own user folder (keys, emulated storage), also `{data_dir}` in other templates. `{app_data}` is the OS's roaming data folder. |
+| `configDir` | Per OS, the folder of the engine's config file (`{xdg_config}` is the XDG config folder). A Flatpak install and a portable `user` folder replace it as they do `dataDir`. |
+| `contentFolder` | `file` (inside `configDir`), `section` and `array` of the ini list of folders the engine reads updates and DLC from. Before a launch Irori lists the game's folder there (`GameFile::content_dir`) and removes the one it listed for the previous game. |
 | `firmware` | `archive` (case-insensitive regex of zip names in the BIOS folder, newest version wins) and `dir` below `dataDir`. Irori unpacks the `.nca` files there before a launch, once per archive, and never over firmware the user installed. |
 | `portableMarker` | Per OS, a file that makes a managed install keep its settings beside itself. |
 | `exitHotkey` | Shown once per engine, the first time a game starts with it. |
@@ -257,6 +259,8 @@ AnyPS5's own system libraries. Its `kind` is `relinker`.
 - Irori never downloads or links to BIOS files or ROMs, except the firmware of the user's
   own RomM server, which it fetches into `<BIOS folder>/RomM/` when a RomM game's system
   lacks it (the BIOS folder is the user's, else `<data>/bios`).
+- A system's `contentCategories` (Switch: `update`, `dlc`) name the RomM file categories that
+  download with a game because the emulator reads them from the game's folder.
 - The systems catalog (`assets/engines/systems.json`) lists each system's BIOS files with
   names, regions, known-good MD5s and a rule: `optional`, `anyOf` (one region is enough)
   or `all`.

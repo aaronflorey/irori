@@ -777,6 +777,10 @@
         "switch",
         "nintendo switch"
       ],
+      "contentCategories": [
+        "update",
+        "dlc"
+      ],
       "bios": {
         "rule": "optional",
         "files": [
