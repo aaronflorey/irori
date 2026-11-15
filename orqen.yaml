@@ -1,0 +1,13 @@
+agent:
+    - opencode
+    - codex
+    - claude-code
+scope: project
+skills:
+    - source: /home/aaron/Code/agent-skills/skills
+      skills:
+        - coding-practices
+        - maintain-github-fork
+    - source: https://github.com/morganlinton/beautifulrust
+      skills:
+        - rust-best-practices
