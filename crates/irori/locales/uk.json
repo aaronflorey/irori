@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "випадково сюрприз перемішати рулетка",
   "shell.notice.exit_hotkey": "{engine}: щоб вийти з гри, натисніть {keys}",
   "shell.notice.udmabuf": "{engine}: цей обліковий запис не може використовувати /dev/udmabuf, тому ігри можуть працювати повільно. Додайте себе до групи-власника (зазвичай kvm) і увійдіть знову.",
+  "shell.notice.romm_firmware_denied": "RomM не дозволив Irori читати свою прошивку. Увійдіть у RomM знову, щоб дозволити це.",
   "shell.notice.backup_failed": "Irori не вдалося створити резервну копію",
   "shell.notice.sync_failed": "Не вдалося синхронізувати бібліотеку",
   "shell.notice.mods_not_restored": "Моди {title} досі в теці гри",

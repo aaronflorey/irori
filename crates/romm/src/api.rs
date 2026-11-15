@@ -6,7 +6,7 @@ use anyhow::{Context as _, Result};
 use serde::de::DeserializeOwned;
 use url::Url;
 
-use crate::model::{Rom, User};
+use crate::model::{Firmware, Rom, User};
 
 /// ROMs asked for per page.
 const PER_PAGE: usize = 500;
@@ -117,6 +117,14 @@ impl Client {
         }
     }
 
+    /// The firmware files of the platform with RomM id `platform_id`. A
+    /// server older than the firmware endpoint answers 404, and a token
+    /// without the `firmware.read` scope 403 ([`ApiError::unauthorized`]).
+    pub async fn firmware(&self, platform_id: u64) -> Result<Vec<Firmware>> {
+        self.json(&format!("/api/firmware?platform_id={platform_id}"))
+            .await
+    }
+
     /// A client for [`Client::download_url`]: it sends the token, and has no
     /// total timeout so large files finish.
     pub fn download_client(&self) -> Result<reqwest::Client> {
@@ -145,6 +153,17 @@ impl Client {
             .push(&file.file_name);
         url.query_pairs_mut()
             .append_pair("file_ids", &file.id.to_string());
+        url.into()
+    }
+
+    /// Where a firmware file downloads from.
+    pub fn firmware_url(&self, firmware: &Firmware) -> String {
+        let mut url = Url::parse(&crate::join(&self.base, "/api/firmware")).expect("valid base");
+        url.path_segments_mut()
+            .expect("http URL")
+            .push(&firmware.id.to_string())
+            .push("content")
+            .push(&firmware.file_name);
         url.into()
     }
 }
@@ -202,6 +221,33 @@ mod tests {
         let api_err = err.downcast_ref::<ApiError>().unwrap();
         assert!(api_err.unauthorized);
         assert_eq!(api_err.message, "Invalid token");
+    }
+
+    #[tokio::test]
+    async fn lists_a_platforms_firmware() {
+        let server = TestServer::start(|req| {
+            if req.path == "/api/firmware?platform_id=7" {
+                Resp::json(json!([{
+                    "id": 3, "platform_id": 7, "file_name": "scph5501.bin",
+                    "file_size_bytes": 524288, "md5_hash": "490f666e1afb15b7362b406ed1cea246",
+                    "sha1_hash": "", "is_verified": true, "missing_from_fs": false,
+                    "unknown_field": 1
+                }]))
+            } else {
+                Resp::status(404)
+            }
+        });
+        let api = client(&server);
+        let list = api.firmware(7).await.unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].file_name, "scph5501.bin");
+        assert_eq!(list[0].md5_hash, "490f666e1afb15b7362b406ed1cea246");
+        assert_eq!(
+            api.firmware_url(&list[0]),
+            format!("{}/api/firmware/3/content/scph5501.bin", server.base())
+        );
+        let err = api.firmware(8).await.unwrap_err();
+        assert_eq!(err.downcast_ref::<ApiError>().unwrap().status, 404);
     }
 
     #[test]

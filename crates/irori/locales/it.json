@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "casuale sorpresa mescola roulette",
   "shell.notice.exit_hotkey": "{engine}: per uscire da un gioco, {keys}",
   "shell.notice.udmabuf": "{engine}: questo account non può usare /dev/udmabuf, quindi i giochi potrebbero essere lenti. Aggiungiti al gruppo che lo possiede (spesso kvm) e accedi di nuovo.",
+  "shell.notice.romm_firmware_denied": "RomM non ha permesso a Irori di leggere il suo firmware. Accedi di nuovo a RomM per consentirlo.",
   "shell.notice.backup_failed": "Irori non è riuscito a eseguire il backup",
   "shell.notice.sync_failed": "Sincronizzazione della libreria non riuscita",
   "shell.notice.mods_not_restored": "Le mod di {title} sono ancora nella sua cartella",

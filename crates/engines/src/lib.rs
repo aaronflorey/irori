@@ -25,6 +25,7 @@ pub mod archive;
 pub mod bios;
 pub mod cheevos;
 pub mod discovery;
+pub mod firmware;
 pub mod host;
 pub mod install;
 pub mod launch;
@@ -171,6 +172,12 @@ pub mod dirs {
     /// `system_directory`).
     pub fn system() -> PathBuf {
         Paths::get().data.join("engines").join("system")
+    }
+
+    /// BIOS files Irori keeps itself (RomM's firmware) while the user has
+    /// chosen no BIOS folder.
+    pub fn bios() -> PathBuf {
+        Paths::get().data.join("bios")
     }
 
     /// Release lists and partial downloads.

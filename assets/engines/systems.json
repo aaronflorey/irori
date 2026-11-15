@@ -777,6 +777,17 @@
         "switch",
         "nintendo switch"
       ],
+      "bios": {
+        "rule": "optional",
+        "files": [
+          {
+            "name": "prod.keys"
+          },
+          {
+            "name": "title.keys"
+          }
+        ]
+      },
       "engines": [
         "eden"
       ]

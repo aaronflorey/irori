@@ -10,6 +10,7 @@
 //! manifest cannot run code.
 
 use std::collections::BTreeMap;
+use std::path::Path;
 
 use anyhow::{Context as _, Result, bail};
 use serde::{Deserialize, Serialize};
@@ -233,6 +234,17 @@ impl<T> PerOs<T> {
     }
 }
 
+/// A firmware archive an engine needs: a zip of `.nca` files that Irori
+/// unpacks into `dir` below the engine's data folder.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FirmwareSpec {
+    /// Regex matched against archive file names, case-insensitively
+    /// (`^firmware.*\.zip$`). The newest version in the name wins.
+    pub archive: String,
+    /// Relative to the engine's data folder.
+    pub dir: String,
+}
+
 /// Everything Irori knows about one engine.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -259,6 +271,16 @@ pub struct EngineManifest {
     /// Engines configured by Irori (RetroArch) have none.
     #[serde(default)]
     pub bios_dir: PerOs<Option<String>>,
+    /// The engine's own user folder (keys, the emulated console's storage),
+    /// per OS (placeholders expanded). Available to other templates as
+    /// `{data_dir}`. A Flatpak install keeps it in its own sandbox, and a
+    /// `user` folder beside the program takes its place.
+    #[serde(default)]
+    pub data_dir: PerOs<Option<String>>,
+    /// System software installed into [`EngineManifest::data_dir`] before a
+    /// launch, from the user's BIOS folder.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub firmware: Option<FirmwareSpec>,
     /// A file whose presence beside the program makes the engine keep its
     /// settings in its own folder, per OS.
     #[serde(default)]
@@ -297,6 +319,19 @@ impl EngineManifest {
                 "engine id {:?} must be lower-case letters, digits and dashes",
                 self.id
             );
+        }
+        if let Some(firmware) = &self.firmware {
+            regex::Regex::new(&firmware.archive)
+                .with_context(|| format!("{}: firmware.archive is not a regex", self.id))?;
+            if irori_core::archive_guard::relative_entry_path(Path::new(&firmware.dir)).is_none() {
+                bail!("{}: firmware.dir must be a relative folder", self.id);
+            }
+            if self.data_dir.linux.is_none()
+                && self.data_dir.macos.is_none()
+                && self.data_dir.windows.is_none()
+            {
+                bail!("{}: firmware needs dataDir", self.id);
+            }
         }
         let ids: Vec<&str> = self.options.iter().map(|o| o.id.as_str()).collect();
         for option in &self.options {

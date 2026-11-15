@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "rastgele sürpriz karıştır rulet",
   "shell.notice.exit_hotkey": "{engine}: oyundan çıkmak için {keys}",
   "shell.notice.udmabuf": "{engine}: bu hesap /dev/udmabuf kullanamıyor, bu yüzden oyunlar yavaş çalışabilir. Kendinizi onun sahibi olan gruba (genellikle kvm) ekleyin ve yeniden oturum açın.",
+  "shell.notice.romm_firmware_denied": "RomM, Irori’nin üretici yazılımını okumasına izin vermedi. İzin vermek için RomM’de yeniden oturum açın.",
   "shell.notice.backup_failed": "Irori yedek alamadı",
   "shell.notice.sync_failed": "Kitaplık eşitlemesi başarısız oldu",
   "shell.notice.mods_not_restored": "{title} modları hâlâ oyunun klasöründe",

@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "무작위 랜덤 셔플 룰렛",
   "shell.notice.exit_hotkey": "{engine}: 게임에서 나가려면 {keys}",
   "shell.notice.udmabuf": "{engine}: 이 계정은 /dev/udmabuf를 사용할 수 없어 게임이 느리게 실행될 수 있습니다. 해당 파일을 소유한 그룹(보통 kvm)에 자신을 추가한 후 다시 로그인하세요.",
+  "shell.notice.romm_firmware_denied": "RomM이 Irori의 펌웨어 읽기를 허용하지 않았습니다. 허용하려면 RomM에 다시 로그인하세요.",
   "shell.notice.backup_failed": "Irori가 백업하지 못했습니다",
   "shell.notice.sync_failed": "라이브러리 동기화에 실패했습니다",
   "shell.notice.mods_not_restored": "{title}의 모드가 아직 게임 폴더에 있습니다",

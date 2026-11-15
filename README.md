@@ -15,8 +15,7 @@
   <img alt="19 languages" src="https://img.shields.io/badge/languages-19-ff6b2c">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-ff6b2c"></a>
   <a href="https://x.com/irorilauncher"><img alt="Follow @irorilauncher on X" src="https://img.shields.io/badge/follow-%40irorilauncher-ff6b2c?logo=x"></a>
-</p>
-
+</
 <p align="center">
   <a href="https://irori.app"><b>Website</b></a> ·
   <a href="#install"><b>Install</b></a> ·
@@ -309,7 +308,8 @@ build Irori yourself, see [Building](#building).
   before you play.
 - **RomM:** sign in to your RomM server (5.0 or later) in the browser and your whole
   ROMs of every system Irori emulates join the library. They download, update when their
-  files change on the server, and play like any ROM.
+  files change on the server, and play like any ROM. The BIOS files and Switch firmware
+  and keys a system needs come from the platform's firmware on your server.
 
 <p align="center">
   <picture>

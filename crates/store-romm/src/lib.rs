@@ -11,9 +11,13 @@
 //!   patches or other extras) download through [`irori_depot`] (resumable,
 //!   speed-limited) into a folder of their own, laid out as on the server.
 //!   An update is offered when RomM's files change (others, size or hash).
+//! * Firmware ([`firmware`](mod@firmware)): the BIOS files and system software
+//!   the game's emulator needs come from the firmware RomM keeps for its
+//!   platform, when the user lacks them.
 //! * Launch: the file with its emulator, as the ROM library plays its games
 //!   ([`irori_engines::play`]).
 
+mod firmware;
 mod install;
 mod records;
 pub mod signin;
@@ -306,6 +310,10 @@ pub struct RommStore {
     state: RwLock<State>,
     /// Serialises changes of `installed.json`.
     files_lock: tokio::sync::Mutex<()>,
+    /// Systems whose firmware was looked for this run.
+    firmware_checked: parking_lot::Mutex<std::collections::HashSet<String>>,
+    /// The notice about RomM refusing firmware was shown this run.
+    firmware_denied_told: std::sync::atomic::AtomicBool,
 }
 
 impl RommStore {
@@ -329,6 +337,8 @@ impl RommStore {
             layout,
             state: RwLock::new(State::default()),
             files_lock: tokio::sync::Mutex::new(()),
+            firmware_checked: Default::default(),
+            firmware_denied_told: Default::default(),
         })
     }
 
@@ -709,6 +719,13 @@ impl Store for RommStore {
         ctx: OpContext,
     ) -> Result<LaunchPlan> {
         let record = self.require_record(app_name)?;
+        let rom = self.state.read().roms.get(app_name).cloned();
+        if let Some(system) = systems::get(&record.system)
+            && let Some(rom) = rom
+            && self.first_firmware_check(&record.system)
+        {
+            self.fetch_firmware(&rom, system, &ctx).await;
+        }
         let game = GameFile {
             path: record.path(),
             system: record.system,

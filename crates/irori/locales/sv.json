@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "slump överraskning blanda roulette",
   "shell.notice.exit_hotkey": "{engine}: lämna ett spel med {keys}",
   "shell.notice.udmabuf": "{engine}: det här kontot kan inte använda /dev/udmabuf, så spel kan gå långsamt. Lägg till dig i gruppen som äger den (ofta kvm) och logga in igen.",
+  "shell.notice.romm_firmware_denied": "RomM lät inte Irori läsa sin firmware. Logga in på RomM igen för att tillåta det.",
   "shell.notice.backup_failed": "Irori kunde inte säkerhetskopiera",
   "shell.notice.sync_failed": "Synkningen av biblioteket misslyckades",
   "shell.notice.mods_not_restored": "Moddarna för {title} ligger kvar i dess mapp",

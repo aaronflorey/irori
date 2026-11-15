@@ -16,8 +16,8 @@ highlights:
     body: Installed on request from each project’s own servers, side by side by version.
   - title: Twelve RetroArch cores
     body: Missing cores are installed on the way when a game needs one.
-  - title: BIOS checked, never downloaded
-    body: Irori finds the files a system needs in your folder and tells you what is missing.
+  - title: BIOS checked, from your own files
+    body: Irori finds the files a system needs in your folder, or on your RomM server, and tells you what is missing.
   - title: System, region and revision
     body: Read from the file name, for badges, filters and per-system shelves in Big Picture.
   - title: An emulator per system or per game
@@ -48,7 +48,8 @@ their x64 build, which Windows runs itself.
 
 ## BIOS files, handled carefully
 
-Irori never downloads or links to BIOS files or ROMs. Point it at your own BIOS folder: it hashes
+Irori never downloads or links to BIOS files or ROMs from the internet. Point it at your own BIOS
+folder, or at your own RomM server, which supplies the firmware it holds for a platform: it hashes
 only files that could plausibly be BIOS images, caches the results, and links the right files
 under the names each emulator expects before a game starts. When something is missing, the game
 doesn’t fail mysteriously; Irori says which file it needs and offers to choose the folder.

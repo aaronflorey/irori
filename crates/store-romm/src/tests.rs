@@ -10,10 +10,22 @@ use super::*;
 
 const TOKEN: &str = "rmm_test";
 
+/// The firmware RomM keeps for the PlayStation platform.
+const BIOS_BYTES: &[u8] = b"a PlayStation BIOS";
+
+/// Paths for the BIOS index, once per run.
+static ROOT: std::sync::LazyLock<tempfile::TempDir> = std::sync::LazyLock::new(|| {
+    let dir = tempfile::tempdir().expect("temp dir");
+    Paths::init(Paths::under(dir.path()));
+    dir
+});
+
 /// RomM's answers; tests change `rom_bytes` and `revoked` as they go.
 struct Server {
     rom_bytes: Mutex<Vec<u8>>,
     revoked: Mutex<bool>,
+    /// The status of the firmware list.
+    firmware_status: Mutex<u16>,
 }
 
 fn rom_json(server: &Server) -> serde_json::Value {
@@ -56,6 +68,7 @@ fn rom_json(server: &Server) -> serde_json::Value {
         },
         {
             "id": 10,
+            "platform_id": 5,
             "name": "Final Fantasy VII",
             "fs_name_no_ext": "Final Fantasy VII (USA)",
             "full_path": "roms/psx/Final Fantasy VII (USA)",
@@ -103,6 +116,7 @@ fn start_server() -> (TestServer, Arc<Server>) {
     let state = Arc::new(Server {
         rom_bytes: Mutex::new(b"SNES ROM v1".to_vec()),
         revoked: Mutex::new(false),
+        firmware_status: Mutex::new(200),
     });
     let s = state.clone();
     let server = TestServer::start(move |req| {
@@ -119,6 +133,21 @@ fn start_server() -> (TestServer, Arc<Server>) {
             Resp::json(json!({"id": 1, "username": "samus"}))
         } else if path.starts_with("/api/roms?") {
             Resp::json(json!({"items": rom_json(&s)}))
+        } else if path == "/api/firmware?platform_id=5" {
+            match *s.firmware_status.lock() {
+                200 => Resp::json(json!([
+                    {"id": 50, "platform_id": 5, "file_name": "scph5501.bin",
+                     "file_size_bytes": BIOS_BYTES.len(), "md5_hash": "", "sha1_hash": ""},
+                    {"id": 51, "platform_id": 5, "file_name": "other.bin",
+                     "file_size_bytes": 3, "md5_hash": "", "sha1_hash": ""},
+                ])),
+                status => Resp {
+                    body: br#"{"detail":"Insufficient scope"}"#.to_vec(),
+                    ..Resp::status(status)
+                },
+            }
+        } else if path == "/api/firmware/50/content/scph5501.bin" {
+            serve_bytes(req, BIOS_BYTES, true)
         } else if path.starts_with("/api/roms/7/content/") && path.ends_with("?file_ids=71") {
             serve_bytes(req, &s.rom_bytes.lock(), true)
         } else if let Some((_, id)) = path
@@ -138,8 +167,10 @@ fn test_dir() -> tempfile::TempDir {
 }
 
 fn store(dir: &Path) -> Arc<RommStore> {
+    std::sync::LazyLock::force(&ROOT);
     let app = Arc::new(AppSettings {
         default_install_path: dir.join("Games").display().to_string(),
+        bios_folder: dir.join("bios").display().to_string(),
         ..Default::default()
     });
     RommStore::with_layout(
@@ -332,6 +363,52 @@ async fn downloads_every_file_of_disc_and_folder_games() {
     assert_eq!(record.path(), doom.join("DOOM.EXE"));
     assert_eq!(record.files, ["DATA/DOOM1.WAD", "DOOM.EXE", "INSTALL.EXE"]);
     assert!(s.updatable_games().await.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn fetches_the_bios_a_system_lacks_from_romms_firmware() {
+    let (server, _) = start_server();
+    let dir = test_dir();
+    let s = signed_in(dir.path(), &server).await;
+
+    assert!(matches!(install(&s, "10").await, Outcome::Done));
+    let romm = dir.path().join("bios/RomM");
+    assert_eq!(
+        std::fs::read(romm.join("scph5501.bin")).unwrap(),
+        BIOS_BYTES
+    );
+    assert!(
+        !romm.join("other.bin").exists(),
+        "only what the system's emulator looks for is fetched"
+    );
+    let index = irori_engines::bios::cached_index();
+    assert!(
+        index
+            .files
+            .iter()
+            .any(|f| f.path == romm.join("scph5501.bin"))
+    );
+}
+
+#[tokio::test]
+async fn a_game_installs_when_romm_refuses_its_firmware() {
+    let (server, state) = start_server();
+    *state.firmware_status.lock() = 403;
+    let dir = test_dir();
+    let s = signed_in(dir.path(), &server).await;
+    let mut events = s.bus.subscribe();
+
+    assert!(matches!(install(&s, "10").await, Outcome::Done));
+    assert!(!dir.path().join("bios/RomM").exists());
+    assert!(s.user().is_some(), "the sign-in stands");
+    let mut told = 0;
+    while let Ok(event) = events.try_recv() {
+        if matches!(event, Event::Notice(n) if n.title_key == Some("shell.notice.romm_firmware_denied"))
+        {
+            told += 1;
+        }
+    }
+    assert_eq!(told, 1);
 }
 
 #[test]

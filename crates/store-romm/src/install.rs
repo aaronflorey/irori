@@ -28,7 +28,7 @@ fn progress_sink(ctx: &OpContext) -> irori_depot::ProgressFn {
     })
 }
 
-fn log_line(ctx: &OpContext, line: &str) {
+pub(crate) fn log_line(ctx: &OpContext, line: &str) {
     if let Some(log) = &ctx.log_file {
         use std::io::Write as _;
         if let Ok(mut f) = std::fs::OpenOptions::new()
@@ -203,6 +203,7 @@ impl RommStore {
             ctx,
             &format!("downloaded {} to {}", rom.title(), install_dir.display()),
         );
+        self.fetch_firmware(&rom, download.system, ctx).await;
         Ok(Outcome::Done)
     }
 }

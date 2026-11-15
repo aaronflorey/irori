@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "ランダム おまかせ シャッフル ルーレット",
   "shell.notice.exit_hotkey": "{engine}: ゲームを終了するには {keys}",
   "shell.notice.udmabuf": "{engine}: このアカウントは /dev/udmabuf を使用できないため、ゲームの動作が遅くなる可能性があります。所有グループ (多くは kvm) に自分を追加して、サインインし直してください。",
+  "shell.notice.romm_firmware_denied": "RomMがIroriにファームウェアの読み取りを許可しませんでした。許可するには、RomMに再度サインインしてください。",
   "shell.notice.backup_failed": "Irori はバックアップできませんでした",
   "shell.notice.sync_failed": "ライブラリの同期に失敗しました",
   "shell.notice.mods_not_restored": "{title} の Mod がまだゲームフォルダーに残っています",

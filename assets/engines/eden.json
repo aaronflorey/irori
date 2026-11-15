@@ -47,6 +47,20 @@
       "eden.exe"
     ]
   },
+  "dataDir": {
+    "linux": "{xdg_data}/eden",
+    "macos": "{xdg_data}/eden",
+    "windows": "{app_data}/eden"
+  },
+  "biosDir": {
+    "linux": "{data_dir}/keys",
+    "macos": "{data_dir}/keys",
+    "windows": "{data_dir}/keys"
+  },
+  "firmware": {
+    "archive": "^firmware.*\\.zip$",
+    "dir": "nand/system/Contents/registered"
+  },
   "launch": {
     "args": [
       {

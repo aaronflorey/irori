@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "aleatório surpresa embaralhar roleta",
   "shell.notice.exit_hotkey": "{engine}: para sair de um jogo, {keys}",
   "shell.notice.udmabuf": "{engine}: esta conta não pode usar /dev/udmabuf, então os jogos podem ficar lentos. Adicione-se ao grupo dono dele (geralmente kvm) e entre novamente.",
+  "shell.notice.romm_firmware_denied": "O RomM não permitiu que o Irori lesse o firmware dele. Entre no RomM novamente para permitir.",
   "shell.notice.backup_failed": "O Irori não conseguiu fazer o backup",
   "shell.notice.sync_failed": "A sincronização da biblioteca falhou",
   "shell.notice.mods_not_restored": "Os mods de {title} ainda estão na pasta dele",

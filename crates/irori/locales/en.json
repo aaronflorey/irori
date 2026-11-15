@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "random surprise shuffle roulette",
   "shell.notice.exit_hotkey": "{engine}: to leave a game, {keys}",
   "shell.notice.udmabuf": "{engine}: this account can’t use /dev/udmabuf, so games may run slowly. Add yourself to the group that owns it (often kvm) and sign in again.",
+  "shell.notice.romm_firmware_denied": "RomM didn’t let Irori read its firmware. Sign in to RomM again to allow it.",
   "shell.notice.backup_failed": "Irori couldn’t back up",
   "shell.notice.sync_failed": "Library sync failed",
   "shell.notice.mods_not_restored": "The mods of {title} are still in its folder",

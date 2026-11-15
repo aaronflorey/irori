@@ -49,15 +49,12 @@ pub async fn launch_plan(
     let settings = request.settings.clone();
 
     // Checked first: no emulator download helps a game without its BIOS.
-    let bios_root = (!app.bios_folder.trim().is_empty())
-        .then(|| irori_core::paths::expand_home(&app.bios_folder));
+    let bios_root = bios::folder(&app.bios_folder);
     let sys_id = game.system.clone();
     let index = tokio::task::spawn_blocking(move || -> Result<bios::BiosIndex> {
         let mut index = bios::cached_index();
-        if let Some(root) = &bios_root
-            && &index.root != root
-        {
-            index = bios::scan(root, &index)?;
+        if index.root != bios_root {
+            index = bios::scan(&bios_root, &index)?;
         }
         let system = crate::systems::get(&sys_id).context("unknown system")?;
         BiosMissing::check(system, &index)?;

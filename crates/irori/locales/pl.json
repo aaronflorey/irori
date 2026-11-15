@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "losowo niespodzianka losuj ruletka",
   "shell.notice.exit_hotkey": "{engine}: aby wyjść z gry, {keys}",
   "shell.notice.udmabuf": "{engine}: to konto nie może używać /dev/udmabuf, więc gry mogą działać wolno. Dodaj się do grupy, która jest jego właścicielem (często kvm), i zaloguj się ponownie.",
+  "shell.notice.romm_firmware_denied": "RomM nie pozwolił Irori odczytać swojego firmware’u. Zaloguj się do RomM ponownie, aby na to zezwolić.",
   "shell.notice.backup_failed": "Irori nie mogło utworzyć kopii zapasowej",
   "shell.notice.sync_failed": "Synchronizacja biblioteki się nie powiodła",
   "shell.notice.mods_not_restored": "Mody gry {title} są nadal w jej folderze",

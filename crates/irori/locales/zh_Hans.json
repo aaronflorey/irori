@@ -85,6 +85,7 @@
   "shell.palette.random_keywords": "随机 惊喜 打乱 轮盘",
   "shell.notice.exit_hotkey": "{engine}：退出游戏请按 {keys}",
   "shell.notice.udmabuf": "{engine}：此帐户无法使用 /dev/udmabuf，游戏可能会运行缓慢。请将自己加入拥有它的用户组（通常是 kvm），然后重新登录。",
+  "shell.notice.romm_firmware_denied": "RomM 未允许 Irori 读取其固件。请重新登录 RomM 以允许。",
   "shell.notice.backup_failed": "Irori 无法备份",
   "shell.notice.sync_failed": "游戏库同步失败",
   "shell.notice.mods_not_restored": "{title} 的模组仍在其文件夹中",

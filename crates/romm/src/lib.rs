@@ -10,20 +10,22 @@
 //!   with its files.
 //! * Downloads ([`Client::download_url`]): one file of a ROM, sent with the
 //!   token in the `Authorization` header (see [`Client::download_client`]).
+//! * Firmware ([`Client::firmware`]): the BIOS and system files the server
+//!   keeps for a platform, downloaded the same way ([`Client::firmware_url`]).
 
 mod api;
 pub mod device;
 mod model;
 
 pub use api::{ApiError, Client};
-pub use model::{Rom, RomFile, User};
+pub use model::{Firmware, Rom, RomFile, User};
 
 use anyhow::{Context as _, Result, bail};
 use url::Url;
 
 /// What Irori asks RomM to allow: the account (to name it), and reading the
-/// library and its files.
-pub const SCOPES: &[&str] = &["me.read", "roms.read", "platforms.read"];
+/// library, its files and the platforms' firmware.
+pub const SCOPES: &[&str] = &["me.read", "roms.read", "platforms.read", "firmware.read"];
 
 /// The server address the user typed, as a base URL without a trailing
 /// slash. A bare host gets `https://`; a path (RomM behind a reverse proxy

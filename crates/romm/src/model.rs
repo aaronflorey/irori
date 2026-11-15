@@ -17,6 +17,8 @@ pub struct User {
 #[serde(default)]
 pub struct Rom {
     pub id: u64,
+    /// RomM's id of the ROM's platform, which names its firmware.
+    pub platform_id: u64,
     /// The name RomM matched in its metadata sources; `None` when the ROM
     /// is unidentified.
     pub name: Option<String>,
@@ -110,6 +112,20 @@ impl RomFile {
             .unwrap_or(&self.updated_at);
         format!("{}:{}:{content}", self.id, self.file_size_bytes)
     }
+}
+
+/// A firmware file of a platform (`GET /api/firmware`, `FirmwareSchema`).
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct Firmware {
+    pub id: u64,
+    pub platform_id: u64,
+    pub file_name: String,
+    pub file_size_bytes: u64,
+    pub sha1_hash: String,
+    pub md5_hash: String,
+    /// The file is listed but gone from the server's disk.
+    pub missing_from_fs: bool,
 }
 
 #[cfg(test)]

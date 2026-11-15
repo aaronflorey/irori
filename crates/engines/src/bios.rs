@@ -3,7 +3,9 @@
 //! twice, and per-system status from it. Before a launch, the files a system
 //! needs are linked under the names engines expect.
 //!
-//! Irori never downloads BIOS files; it only recognises the user's own.
+//! Irori recognises the user's own BIOS files. The only ones it fetches are
+//! the firmware of the user's own RomM server ([`wanted`] says which of its
+//! files the user is missing).
 
 use std::collections::BTreeMap;
 use std::io::Read as _;
@@ -15,7 +17,8 @@ use irori_core::json_store;
 use md5::{Digest as _, Md5};
 use serde::{Deserialize, Serialize};
 
-use crate::systems::{self, BiosRule, System};
+use crate::manifest::FirmwareSpec;
+use crate::systems::{self, BiosFile, BiosRule, System};
 
 /// Files larger than this are not BIOS images (the largest are a few MiB).
 const MAX_BIOS_SIZE: u64 = 32 << 20;
@@ -37,6 +40,16 @@ pub struct BiosIndex {
     /// The folder this index is of.
     pub root: PathBuf,
     pub files: Vec<IndexedFile>,
+}
+
+/// The folder BIOS files are read from: the user's choice (`configured`,
+/// the `biosFolder` setting), else Irori's own.
+pub fn folder(configured: &str) -> PathBuf {
+    if configured.trim().is_empty() {
+        crate::dirs::bios()
+    } else {
+        irori_core::paths::expand_home(configured)
+    }
 }
 
 fn index_file() -> PathBuf {
@@ -255,6 +268,87 @@ pub fn status(system: &System, index: &BiosIndex) -> SystemBios {
     }
 }
 
+/// A file a server offers.
+#[derive(Debug, Clone, Copy)]
+pub struct Offer<'a> {
+    pub name: &'a str,
+    /// Lower-case MD5; empty when unknown.
+    pub md5: &'a str,
+}
+
+/// What `system` still lacks.
+enum Lack {
+    /// A BIOS file with no match yet (`found`: a file of the name exists but
+    /// is no known dump, so only a known dump helps).
+    File { want: BiosFile, found: bool },
+    /// A firmware archive no file of `root` matches.
+    Archive(FirmwareSpec),
+}
+
+fn lacking(system: &System, root: &Path, index: &BiosIndex) -> Vec<Lack> {
+    let mut out: Vec<Lack> = status(system, index)
+        .files
+        .iter()
+        .zip(&system.bios.files)
+        .filter(|(have, _)| have.state != FileState::Ready)
+        .map(|(have, want)| Lack::File {
+            want: want.clone(),
+            found: have.found.is_some(),
+        })
+        .collect();
+    for engine in &system.engines {
+        let id = engine.split(':').next().unwrap_or(engine);
+        if let Some(spec) = crate::engine(id).and_then(|m| m.firmware.clone())
+            && crate::firmware::find_archive(&spec, root).is_none()
+        {
+            out.push(Lack::Archive(spec));
+        }
+    }
+    out
+}
+
+/// Whether `system` lacks a BIOS file or firmware archive, so a server's
+/// firmware could help. Blocking.
+pub fn lacks(system: &System, root: &Path, index: &BiosIndex) -> bool {
+    !lacking(system, root, index).is_empty()
+}
+
+/// Which of the server's `offers` (by position) give `system` what it
+/// lacks: a file by its known digest, or by its name when none is there yet,
+/// and the newest firmware archive. Blocking.
+pub fn wanted(system: &System, root: &Path, index: &BiosIndex, offers: &[Offer]) -> Vec<usize> {
+    let mut picked = Vec::new();
+    for lack in lacking(system, root, index) {
+        let found = match lack {
+            Lack::File { want, found } => {
+                let pattern = want
+                    .pattern
+                    .as_deref()
+                    .and_then(|p| regex::Regex::new(p).ok());
+                let by_digest = |o: &Offer| {
+                    !o.md5.is_empty() && want.md5.iter().any(|m| m.eq_ignore_ascii_case(o.md5))
+                };
+                let by_name = |o: &Offer| match &pattern {
+                    Some(p) => p.is_match(o.name),
+                    None => o.name.eq_ignore_ascii_case(&want.name),
+                };
+                offers
+                    .iter()
+                    .position(by_digest)
+                    .or_else(|| offers.iter().position(|o| !found && by_name(o)))
+            }
+            Lack::Archive(spec) => crate::firmware::newest(&spec, offers.iter().map(|o| o.name))
+                .and_then(|name| offers.iter().position(|o| o.name == name)),
+        };
+        if let Some(i) = found
+            && !picked.contains(&i)
+        {
+            picked.push(i);
+        }
+    }
+    picked
+}
+
 /// Link every found file of `system` into `target` under its expected
 /// name, replacing older links. Returns how many were linked. Blocking.
 pub fn link_into(system: &System, index: &BiosIndex, target: &Path) -> Result<usize> {
@@ -381,6 +475,60 @@ mod tests {
         let target = dir.path().join("bios");
         assert_eq!(link_into(ps2, &index, &target).unwrap(), 1);
         assert!(target.join("SCPH-70012_BIOS_V12.bin").exists());
+    }
+
+    #[test]
+    fn picks_the_offered_files_a_system_lacks() {
+        let _ = crate::test_root("bios-wanted");
+        let dir = tempfile::tempdir().unwrap();
+        let offers = [
+            Offer {
+                name: "other.bin",
+                md5: "",
+            },
+            Offer {
+                name: "SCPH5501.BIN",
+                md5: "",
+            },
+            Offer {
+                name: "Firmware 9.0.0.zip",
+                md5: "",
+            },
+            Offer {
+                name: "Firmware 19.0.1.zip",
+                md5: "",
+            },
+            Offer {
+                name: "prod.keys",
+                md5: "",
+            },
+        ];
+        let empty = BiosIndex::default();
+        // A PlayStation lacks its BIOS, found by name; nothing else is offered.
+        assert_eq!(wanted(psx(), dir.path(), &empty, &offers), [1]);
+        // A known digest finds a file whatever it is called.
+        let by_digest = [Offer {
+            name: "any name.bin",
+            md5: "8dd7d5296a650fac7319bce665a6a53c",
+        }];
+        assert_eq!(wanted(psx(), dir.path(), &empty, &by_digest), [0]);
+        // The Switch lacks its keys and, for Eden, the newest firmware.
+        let switch = systems::get("switch").unwrap();
+        assert_eq!(wanted(switch, dir.path(), &empty, &offers), [4, 3]);
+
+        // What the user has is not fetched again.
+        let have = BiosIndex {
+            root: dir.path().into(),
+            files: vec![IndexedFile {
+                path: dir.path().join("prod.keys"),
+                size: 1,
+                mtime: 0,
+                md5: "00".into(),
+            }],
+        };
+        std::fs::write(dir.path().join("firmware.zip"), b"x").unwrap();
+        assert!(wanted(switch, dir.path(), &have, &offers).is_empty());
+        assert!(!lacks(systems::get("snes").unwrap(), dir.path(), &empty));
     }
 
     #[test]

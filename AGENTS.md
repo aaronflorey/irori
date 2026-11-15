@@ -1198,9 +1198,19 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   default installation per engine. Installing never changes what games use; Update does,
   and a game pinned with `iroriEngineVersion` keeps its version. Flatpak and system
   installs are detected and labelled, never installed or removed.
-- **BIOS.** Never download or link to BIOS files or ROMs. The BIOS index hashes only
-  plausible files and caches digests by path, size and modification time; nothing is
-  hashed at launch. Files are linked under the expected names before a launch.
+- **BIOS.** Never download or link to BIOS files or ROMs from anywhere but the user's
+  own RomM server (see RomM below). The BIOS index hashes only plausible files and caches
+  digests by path, size and modification time; nothing is hashed at launch. Files are
+  linked under the expected names before a launch. The BIOS folder is `iroriBiosFolder`,
+  else Irori's own (`<data>/bios`, `irori_engines::bios::folder`).
+- **Engine firmware** (`irori_engines::firmware`): an engine's manifest may name a
+  `dataDir` (its own user folder, `{data_dir}` in other templates; a Flatpak's sandbox
+  folder or a `user` folder beside the program replaces it) and a `firmware` archive
+  (regex and folder below `dataDir`). Before a launch, the newest matching zip in the BIOS
+  folder is unpacked there as flat `.nca` files, once per archive (`irori-firmware` records
+  which); a folder the user filled themselves is never replaced. Only Eden has one
+  (Switch firmware); its `prod.keys` and `title.keys` are ordinary optional BIOS files
+  linked into `{data_dir}/keys`.
 - **Settings keys** are Irori-only: `iroriEngine`, `iroriEngineVersion`,
   `iroriEngineOptions` (merged per engine and option over the defaults),
   `iroriEngineOwnSettings`, `iroriSystemEngines`, `iroriRomFolders`, `iroriBiosFolder`.
@@ -1248,7 +1258,7 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   ids): the user's self-hosted RomM server (5.0 or later). Sign-in is RomM's device flow:
   the login dialog draws a server field (`irori_manage` `login/romm.rs`), opens RomM's
   `/pair/device` page in the browser and polls until RomM issues a client API token
-  (`rmm_…`, scopes `me.read roms.read platforms.read`), kept with `irori_secrets`; the
+  (`rmm_…`, scopes `me.read roms.read platforms.read firmware.read`), kept with `irori_secrets`; the
   device id in `<config>/device-id` keeps one entry in RomM's device list per
   installation. Every ROM the account sees is cached for offline; only those of RomM
   platforms `irori_romm::system_of` maps to a system (RomM's universal slugs) are listed.
@@ -1260,6 +1270,13 @@ Design: `docs/design/engines.md`; Lutris behaviour: `docs/parity/lutris.md`.
   PlayStation 3–5 folders their `folderMain` program, DOS folders
   `irori_engines::systems::dos_program`, ScummVM the folder. An update is offered when
   any file's id, size or hash changes. Launching is the ROM library's (`irori_engines::play::launch_plan`).
+  **Firmware** (`irori-romm` `firmware.rs`): after an install, and before the first launch of
+  a system each run, what the system lacks (`irori_engines::bios::wanted`: BIOS files by
+  known digest, else by name when none is there, and the newest firmware archive of its
+  engines) is downloaded from `/api/firmware?platform_id=` into `<BIOS folder>/RomM/` and
+  the index is rescanned. It never fails an install or launch: a token without
+  `firmware.read` (signed in before the scope existed) raises one
+  `shell.notice.romm_firmware_denied` notice per run and never signs the user out.
   Covers come from the server's `/assets/romm/resources/`, which RomM serves without
   sign-in.
 - **Fix dialogs.** `irori_ui::save_conflict::resolve_launch_error` also turns

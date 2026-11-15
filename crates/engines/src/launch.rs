@@ -231,12 +231,14 @@ pub fn command(input: &LaunchInput) -> Result<CommandSpec> {
         .clone()
         .or_else(|| installation.program.parent().map(Path::to_path_buf))
         .unwrap_or_default();
-    let vars = Vars {
+    let mut vars = Vars {
         rom: game.path.display().to_string(),
         rom_dir: rom_dir.display().to_string(),
         home: dirs::home_dir().unwrap_or_default().display().to_string(),
         engine_home: home.display().to_string(),
         engine_dir: engine_dir.display().to_string(),
+        data_dir: String::new(),
+        app_data: dirs::data_dir().unwrap_or_default().display().to_string(),
         xdg_data: std::env::var("XDG_DATA_HOME")
             .ok()
             .filter(|v| !v.is_empty())
@@ -248,6 +250,25 @@ pub fn command(input: &LaunchInput) -> Result<CommandSpec> {
                     .to_string()
             }),
     };
+
+    let data_dir = manifest.data_dir.get(os).as_deref().map(|template| {
+        let own = PathBuf::from(vars.expand(template));
+        let portable = engine_dir.join("user");
+        match (&installation.flatpak, installation.origin) {
+            // A Flatpak keeps its XDG data folder inside its own sandbox.
+            (Some(id), Origin::Flatpak) => dirs::home_dir()
+                .unwrap_or_default()
+                .join(".var/app")
+                .join(id)
+                .join("data")
+                .join(own.file_name().unwrap_or_default()),
+            _ if portable.is_dir() => portable,
+            _ => own,
+        }
+    });
+    if let Some(dir) = &data_dir {
+        vars.data_dir = dir.display().to_string();
+    }
 
     // Folders the Flatpak sandbox must see.
     let mut shared: Vec<PathBuf> = vec![rom_dir.clone()];
@@ -301,6 +322,13 @@ pub fn command(input: &LaunchInput) -> Result<CommandSpec> {
                     crate::bios::link_into(system, bios, &dir)?;
                     shared.push(bios.root.clone());
                 }
+            }
+            if let (Some(spec), Some(dir)) = (&manifest.firmware, &data_dir)
+                && let Err(e) = crate::firmware::install(spec, &bios.root, dir)
+            {
+                // The game may still start (the emulator has its own
+                // firmware install); the log says why Irori's didn't.
+                tracing::warn!("{} firmware: {e:#}", manifest.name);
             }
             if installation.origin == Origin::Managed
                 && let Some(marker) = manifest.portable_marker.get(os)
@@ -432,6 +460,8 @@ struct Vars {
     home: String,
     engine_home: String,
     engine_dir: String,
+    data_dir: String,
+    app_data: String,
     xdg_data: String,
 }
 
@@ -441,6 +471,8 @@ impl Vars {
             .replace("{rom}", &self.rom)
             .replace("{engine_home}", &self.engine_home)
             .replace("{engine_dir}", &self.engine_dir)
+            .replace("{data_dir}", &self.data_dir)
+            .replace("{app_data}", &self.app_data)
             .replace("{xdg_data}", &self.xdg_data)
             .replace("{home}", &self.home)
     }
@@ -520,6 +552,69 @@ mod tests {
             dir: None,
             size: 0,
         }
+    }
+
+    #[test]
+    fn eden_gets_keys_and_firmware_from_the_bios_folder() {
+        use std::io::Write as _;
+
+        let root = crate::test_root("eden-firmware");
+        let bios = root.join("bios");
+        std::fs::create_dir_all(bios.join("RomM")).unwrap();
+        let keys = bios.join("RomM/prod.keys");
+        std::fs::write(&keys, b"master_key_00 = 00").unwrap();
+        let id = "0123456789abcdef0123456789abcdef";
+        let mut zip = zip::ZipWriter::new(
+            std::fs::File::create(bios.join("RomM/Firmware 19.0.1.zip")).unwrap(),
+        );
+        zip.start_file(
+            format!("{id}.nca"),
+            zip::write::SimpleFileOptions::default(),
+        )
+        .unwrap();
+        zip.write_all(b"nca").unwrap();
+        zip.finish().unwrap();
+
+        // A `user` folder beside the program is Eden's portable storage.
+        let install = root.join("eden-install");
+        std::fs::create_dir_all(install.join("user")).unwrap();
+        let rom = root.join("Game.nsp");
+        std::fs::write(&rom, b"x").unwrap();
+        let m = crate::engine("eden").unwrap();
+        let mut inst = installation("eden", Origin::Managed, &install.join("Eden.AppImage"));
+        inst.dir = Some(install.clone());
+        let values = m.option_values(&BTreeMap::new());
+        let index = BiosIndex {
+            root: bios.clone(),
+            files: vec![crate::bios::IndexedFile {
+                path: keys.clone(),
+                size: 18,
+                mtime: 0,
+                md5: "00".into(),
+            }],
+        };
+        command(&LaunchInput {
+            manifest: &m,
+            installation: &inst,
+            game: &GameFile {
+                path: rom,
+                system: "switch".into(),
+            },
+            core: None,
+            values: &values,
+            bios: &index,
+            own_settings: false,
+        })
+        .unwrap();
+        let user = install.join("user");
+        assert_eq!(
+            std::fs::read(user.join("keys/prod.keys")).unwrap(),
+            b"master_key_00 = 00"
+        );
+        assert_eq!(
+            std::fs::read(user.join(format!("nand/system/Contents/registered/{id}.nca"))).unwrap(),
+            b"nca"
+        );
     }
 
     #[test]
@@ -825,6 +920,8 @@ mod tests {
             home: String::new(),
             engine_home: String::new(),
             engine_dir: String::new(),
+            data_dir: String::new(),
+            app_data: String::new(),
             xdg_data: String::new(),
         };
         let mut out = Vec::new();
