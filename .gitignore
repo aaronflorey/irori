@@ -2,3 +2,4 @@
 /spike
 /dist
 __pycache__/
+!.agents

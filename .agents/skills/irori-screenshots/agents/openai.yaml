@@ -1,0 +1,6 @@
+interface:
+  display_name: "Irori screenshots"
+  short_description: "Render Irori screens headlessly and inspect them"
+  default_prompt: "$irori-screenshots"
+policy:
+  allow_implicit_invocation: true

@@ -62,6 +62,7 @@ Run everything from the repository root.
 | Lint, as CI does | `cargo clippy --locked --workspace --all-targets --profile ci -- -D warnings` |
 | Test everything | `cargo test --locked --workspace --no-fail-fast` (Linux CI wraps it in `xvfb-run -a`) |
 | Test one crate | `cargo test -p <package>`, for example `cargo test -p irori-manage` |
+| Screenshot screens without a display | `IRORI_SNAPSHOT_OUT=<dir> IRORI_SNAPSHOT_LINKS=irori://library cargo test -p irori snapshot -- --ignored --nocapture` (see [8](#8-tests)) |
 | Packaging tests | `python3 -m unittest discover -s packaging -p "test_*.py"` |
 | PR-rule tests | `python3 -m unittest discover -s .github/scripts -p "test_*.py"` |
 | Check a PR name locally | `python3 .github/scripts/pr_rules.py --title "fix(epic): …" --head fix/epic-login` |
@@ -1891,6 +1892,19 @@ are no `tests/` directories or fixture folders. Fixtures are small inline JSON s
   for the harness: isolated `Paths`, `Backend::start_for_tests` over an in-memory `Store`,
   `run_until_parked`, then open and draw a window.
 - They need a display on Linux; CI uses `xvfb-run -a`.
+
+**Screenshots** (`crates/irori/src/snapshot.rs`, an ignored test): the real `AppShell` over a
+backend with an in-memory store, drawn by GPUI's offscreen renderer (wgpu; software Vulkan
+such as lavapipe is enough, no display or compositor). It writes one PNG per link, theme and
+language, so coding agents can see a screen they changed. Variables, each a comma-separated
+list except the size and folder:
+
+- `IRORI_SNAPSHOT_LINKS`: `irori://` links the app opens (default `irori://library`);
+  `irori://game/gog/3` shows a game's page.
+- `IRORI_SNAPSHOT_THEMES` (`dark`, `light`), `IRORI_SNAPSHOT_LANGS` (language codes),
+  `IRORI_SNAPSHOT_SIZE` (`1280x800`, logical pixels; PNGs are 2x), `IRORI_SNAPSHOT_OUT` (folder).
+
+The games are the fixed ones in the test's `MemoryStore`, with no cover art.
 
 **Never enable `gpui-kit`'s `test-support` feature.** It pulls the GPUI Fast crates
 into the lockfile, where they conflict with `gpui-pre`. Crates use

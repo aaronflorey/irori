@@ -19,6 +19,8 @@ mod playnite;
 mod routing;
 mod shell;
 mod sidebar;
+#[cfg(test)]
+mod snapshot;
 mod stores;
 mod strings;
 #[cfg(target_os = "linux")]

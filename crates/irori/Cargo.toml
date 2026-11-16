@@ -57,6 +57,8 @@ regex.workspace = true
 # the optional GPUI Fast crates into the lockfile, which conflict with gpui-pre.
 # Enabling GPUI's own test support exposes `TestAppContext` through `gpui_kit::*`.
 gpui = { package = "gpui-pre", version = "=0.3.9", features = ["test-support"] }
+# Its `test-support` feature adds the offscreen renderer the screenshot harness draws with.
+gpui-platform = { package = "gpui-pre-platform", version = "=0.3.9", features = ["test-support"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 ksni = { version = "0.3", default-features = false, features = ["tokio"] }
