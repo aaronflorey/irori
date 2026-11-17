@@ -1,0 +1,933 @@
+{
+  "version": "1",
+  "themes": {
+    "mode": ["Dark","Light"]
+  },
+  "variables": {
+    "color.bg.accent": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#2A1A11"},{"theme":{"mode":"Light"},"value":"#FDE9DC"}]},
+    "color.bg.card": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#1A1715"},{"theme":{"mode":"Light"},"value":"#F2EDE7"}]},
+    "color.bg.control": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#1D1A17"},{"theme":{"mode":"Light"},"value":"#F0EBE5"}]},
+    "color.bg.control-active": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#2E2925"},{"theme":{"mode":"Light"},"value":"#E1DAD2"}]},
+    "color.bg.control-hover": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#26221E"},{"theme":{"mode":"Light"},"value":"#E9E3DC"}]},
+    "color.bg.hover": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#FFFFFF0A"},{"theme":{"mode":"Light"},"value":"#0000000A"}]},
+    "color.bg.page": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#100E0D"},{"theme":{"mode":"Light"},"value":"#FAF7F3"}]},
+    "color.bg.panel": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#161311"},{"theme":{"mode":"Light"},"value":"#F5F1EC"}]},
+    "color.bg.popover": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#1C1916"},{"theme":{"mode":"Light"},"value":"#FFFFFF"}]},
+    "color.bg.selected": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#FF6B2C22"},{"theme":{"mode":"Light"},"value":"#E5570F18"}]},
+    "color.bg.sidebar": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#0B0A09"},{"theme":{"mode":"Light"},"value":"#F2EEE9"}]},
+    "color.bg.sidebar-active": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#1F1B18"},{"theme":{"mode":"Light"},"value":"#E8E1D9"}]},
+    "color.bg.skeleton": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#221E1B"},{"theme":{"mode":"Light"},"value":"#ECE6DF"}]},
+    "color.border": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#2A2522"},{"theme":{"mode":"Light"},"value":"#E7E0D8"}]},
+    "color.border-input": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#2E3038"},{"theme":{"mode":"Light"},"value":"#D9D4CC"}]},
+    "color.border-subtle": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#1C1916"},{"theme":{"mode":"Light"},"value":"#E7E0D8"}]},
+    "color.brand": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#FF6B2C"},{"theme":{"mode":"Light"},"value":"#E5570F"}]},
+    "color.brand-active": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#EC5A1C"},{"theme":{"mode":"Light"},"value":"#CC4C0B"}]},
+    "color.brand-hover": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#FF7F45"},{"theme":{"mode":"Light"},"value":"#F0651D"}]},
+    "color.chart.1": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#3987E5"},{"theme":{"mode":"Light"},"value":"#2A78D6"}]},
+    "color.chart.2": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#D95926"},{"theme":{"mode":"Light"},"value":"#EB6834"}]},
+    "color.chart.3": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#199E70"},{"theme":{"mode":"Light"},"value":"#1BAF7A"}]},
+    "color.chart.4": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#C98500"},{"theme":{"mode":"Light"},"value":"#EDA100"}]},
+    "color.chart.5": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#D55181"},{"theme":{"mode":"Light"},"value":"#E87BA4"}]},
+    "color.chart.grid": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#202228"},{"theme":{"mode":"Light"},"value":"#ECE8E2"}]},
+    "color.danger": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#F2555A"},{"theme":{"mode":"Light"},"value":"#D92D3A"}]},
+    "color.info": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#5AA9FF"},{"theme":{"mode":"Light"},"value":"#2470D6"}]},
+    "color.link": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#FF9A66"},{"theme":{"mode":"Light"},"value":"#C94A0A"}]},
+    "color.on-brand": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#1A0B03"},{"theme":{"mode":"Light"},"value":"#FFFFFF"}]},
+    "color.on-danger": {"type":"color","value":"#FFFFFF"},
+    "color.on-info": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#04101F"},{"theme":{"mode":"Light"},"value":"#FFFFFF"}]},
+    "color.on-success": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#04130A"},{"theme":{"mode":"Light"},"value":"#FFFFFF"}]},
+    "color.on-warning": {"type":"color","value":"#1D1400"},
+    "color.overlay": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#000000A6"},{"theme":{"mode":"Light"},"value":"#1D1B1966"}]},
+    "color.success": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#4FD18B"},{"theme":{"mode":"Light"},"value":"#1F9D5C"}]},
+    "color.switch-off": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#2E3038"},{"theme":{"mode":"Light"},"value":"#D9D4CC"}]},
+    "color.text": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#F3EEE8"},{"theme":{"mode":"Light"},"value":"#1C1815"}]},
+    "color.text-accent": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#FFC9AB"},{"theme":{"mode":"Light"},"value":"#7A2C05"}]},
+    "color.text-muted": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#A39A91"},{"theme":{"mode":"Light"},"value":"#6F6760"}]},
+    "color.text-sidebar": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#CFC7BF"},{"theme":{"mode":"Light"},"value":"#3A342F"}]},
+    "color.text-strong": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#FFFFFF"},{"theme":{"mode":"Light"},"value":"#1C1815"}]},
+    "color.warning": {"type":"color","value":[{"theme":{"mode":"Dark"},"value":"#F5C451"},{"theme":{"mode":"Light"},"value":"#B98500"}]},
+    "font.sans": {"type":"string","value":"Manrope"},
+    "radius.full": {"type":"number","value":999},
+    "radius.lg": {"type":"number","value":14},
+    "radius.md": {"type":"number","value":10},
+    "radius.sm": {"type":"number","value":6},
+    "size.control": {"type":"number","value":32},
+    "size.nav-row": {"type":"number","value":40},
+    "size.sidebar": {"type":"number","value":240},
+    "space.1": {"type":"number","value":4},
+    "space.10": {"type":"number","value":40},
+    "space.2": {"type":"number","value":8},
+    "space.3": {"type":"number","value":12},
+    "space.4": {"type":"number","value":16},
+    "space.5": {"type":"number","value":20},
+    "space.6": {"type":"number","value":24},
+    "space.8": {"type":"number","value":32},
+    "type.body-strong.color": {"type":"color","value":"$color.text"},
+    "type.body-strong.family": {"type":"string","value":"$font.sans"},
+    "type.body-strong.size": {"type":"number","value":14},
+    "type.body-strong.style": {"type":"string","value":"normal"},
+    "type.body-strong.tracking": {"type":"number","value":0},
+    "type.body-strong.weight": {"type":"number","value":700},
+    "type.body.color": {"type":"color","value":"$color.text"},
+    "type.body.family": {"type":"string","value":"$font.sans"},
+    "type.body.size": {"type":"number","value":14},
+    "type.body.style": {"type":"string","value":"normal"},
+    "type.body.tracking": {"type":"number","value":0},
+    "type.body.weight": {"type":"number","value":500},
+    "type.caption.color": {"type":"color","value":"$color.text-muted"},
+    "type.caption.family": {"type":"string","value":"$font.sans"},
+    "type.caption.size": {"type":"number","value":12},
+    "type.caption.style": {"type":"string","value":"normal"},
+    "type.caption.tracking": {"type":"number","value":0},
+    "type.caption.weight": {"type":"number","value":400},
+    "type.display.color": {"type":"color","value":"$color.text"},
+    "type.display.family": {"type":"string","value":"$font.sans"},
+    "type.display.size": {"type":"number","value":40},
+    "type.display.style": {"type":"string","value":"normal"},
+    "type.display.tracking": {"type":"number","value":-0.5},
+    "type.display.weight": {"type":"number","value":800},
+    "type.heading.color": {"type":"color","value":"$color.text"},
+    "type.heading.family": {"type":"string","value":"$font.sans"},
+    "type.heading.size": {"type":"number","value":18},
+    "type.heading.style": {"type":"string","value":"normal"},
+    "type.heading.tracking": {"type":"number","value":0},
+    "type.heading.weight": {"type":"number","value":700},
+    "type.nav-active.color": {"type":"color","value":"$color.text-strong"},
+    "type.nav-active.family": {"type":"string","value":"$font.sans"},
+    "type.nav-active.size": {"type":"number","value":"$type.nav.size"},
+    "type.nav-active.style": {"type":"string","value":"normal"},
+    "type.nav-active.tracking": {"type":"number","value":0},
+    "type.nav-active.weight": {"type":"number","value":700},
+    "type.nav.color": {"type":"color","value":"$color.text-sidebar"},
+    "type.nav.family": {"type":"string","value":"$font.sans"},
+    "type.nav.size": {"type":"number","value":16},
+    "type.nav.style": {"type":"string","value":"normal"},
+    "type.nav.tracking": {"type":"number","value":0},
+    "type.nav.weight": {"type":"number","value":500},
+    "type.overline.color": {"type":"color","value":"$color.text-muted"},
+    "type.overline.family": {"type":"string","value":"$font.sans"},
+    "type.overline.size": {"type":"number","value":11},
+    "type.overline.style": {"type":"string","value":"normal"},
+    "type.overline.tracking": {"type":"number","value":0.6},
+    "type.overline.weight": {"type":"number","value":700},
+    "type.title.color": {"type":"color","value":"$color.text"},
+    "type.title.family": {"type":"string","value":"$font.sans"},
+    "type.title.size": {"type":"number","value":30},
+    "type.title.style": {"type":"string","value":"normal"},
+    "type.title.tracking": {"type":"number","value":-0.3},
+    "type.title.weight": {"type":"number","value":700}
+  },
+  "children": [
+    {"id":"board","type":"frame","fill":"$color.bg.page","height":912,"layout":"none","name":"Irori components","width":3080,"x":-40,"y":-40,"children":[
+      {"id":"button-primary","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.brand","gap":"$space.2","height":"$size.control","justifyContent":"center","layout":"horizontal","name":"Button / Primary","padding":[0,"$space.4"],"reusable":true,"x":40,"y":40,"children":[
+        {"id":"button-primary-icon","type":"icon","fill":"$color.on-brand","height":16,"icon":"folder-search","library":"lucide","width":16},
+        {"id":"button-primary-label","type":"text","content":"Locate files","fill":"$color.on-brand","fontFamily":"$type.body-strong.family","fontSize":"$type.body-strong.size","fontStyle":"$type.body-strong.style","fontWeight":"$type.body-strong.weight","letterSpacing":"$type.body-strong.tracking"}
+      ]},
+      {"id":"button-secondary","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.control","gap":"$space.2","height":"$size.control","layout":"horizontal","name":"Button / Secondary","padding":[0,"$space.3"],"reusable":true,"stroke":"$color.border-input","strokeAlignment":"inner","strokeWidth":1,"x":40,"y":96,"children":[
+        {"id":"button-secondary-icon","type":"icon","fill":"$color.text","height":16,"icon":"plus","library":"lucide","width":16},
+        {"id":"button-secondary-label","type":"text","content":"Add game","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+      ]},
+      {"id":"button-icon","type":"frame","alignItems":"center","cornerRadius":"$radius.full","fill":"$color.bg.control","height":"$size.control","justifyContent":"center","layout":"horizontal","name":"Button / Icon","reusable":true,"stroke":"$color.border-input","strokeAlignment":"inner","strokeWidth":1,"width":"$size.control","x":40,"y":152,"children":[
+        {"id":"button-icon-glyph","type":"icon","fill":"$color.text","height":16,"icon":"star","library":"lucide","width":16}
+      ]},
+      {"id":"input-search","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.control","gap":"$space.2","height":"$size.control","layout":"horizontal","name":"Input / Search","padding":[0,"$space.3"],"reusable":true,"stroke":"$color.border-input","strokeAlignment":"inner","strokeWidth":1,"width":280,"x":40,"y":208,"children":[
+        {"id":"input-search-icon","type":"icon","fill":"$color.text-muted","height":16,"icon":"search","library":"lucide","width":16},
+        {"id":"input-search-placeholder","type":"text","content":"Search library","fill":"$color.text-muted","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+      ]},
+      {"id":"input-path","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.control","gap":"$space.2","height":"$size.control","layout":"horizontal","name":"Input / Path","padding":[0,"$space.3"],"reusable":true,"stroke":"$color.border-input","strokeAlignment":"inner","strokeWidth":1,"width":300,"x":40,"y":264,"children":[
+        {"id":"input-path-value","type":"text","content":"/home/aaron/Games/Irori","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking","width":"fill_container"},
+        {"id":"input-path-icon","type":"icon","fill":"$color.text","height":16,"icon":"folder-open","library":"lucide","width":16}
+      ]},
+      {"id":"select","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.control","gap":"$space.2","height":"$size.control","layout":"horizontal","name":"Select","padding":[0,"$space.3"],"reusable":true,"stroke":"$color.border-input","strokeAlignment":"inner","strokeWidth":1,"width":240,"x":40,"y":320,"children":[
+        {"id":"select-value","type":"text","content":"English","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking","width":"fill_container"},
+        {"id":"select-chevron","type":"icon","fill":"$color.text","height":16,"icon":"chevron-down","library":"lucide","width":16}
+      ]},
+      {"id":"toggle-on","type":"frame","alignItems":"center","cornerRadius":"$radius.full","fill":"$color.brand","height":22,"justifyContent":"end","layout":"horizontal","name":"Toggle / On","padding":"$space.1","reusable":true,"width":40,"x":40,"y":376,"children":[
+        {"id":"toggle-on-knob","type":"ellipse","fill":"$color.on-brand","height":14,"width":14}
+      ]},
+      {"id":"toggle-off","type":"frame","alignItems":"center","cornerRadius":"$radius.full","fill":"$color.switch-off","height":22,"justifyContent":"start","layout":"horizontal","name":"Toggle / Off","padding":"$space.1","reusable":true,"width":40,"x":96,"y":376,"children":[
+        {"id":"toggle-off-knob","type":"ellipse","fill":"$color.text","height":14,"width":14}
+      ]},
+      {"id":"badge","type":"frame","alignItems":"center","cornerRadius":"$radius.sm","fill":"$color.bg.control","layout":"horizontal","name":"Badge","padding":["$space.1","$space.2"],"reusable":true,"stroke":"$color.border","strokeAlignment":"inner","strokeWidth":1,"x":40,"y":416,"children":[
+        {"id":"badge-label","type":"text","content":"Windows","fill":"$color.text","fontFamily":"$type.caption.family","fontSize":"$type.caption.size","fontStyle":"$type.caption.style","fontWeight":"$type.caption.weight","letterSpacing":"$type.caption.tracking"}
+      ]},
+      {"id":"nav-item","type":"frame","alignItems":"center","cornerRadius":"$radius.md","gap":"$space.3","height":"$size.nav-row","layout":"horizontal","name":"Nav / Item","padding":[0,"$space.3"],"reusable":true,"width":216,"x":400,"y":40,"children":[
+        {"id":"nav-item-icon","type":"icon","fill":"$color.text-sidebar","height":18,"icon":"download","library":"lucide","width":18},
+        {"id":"nav-item-label","type":"text","content":"Downloads","fill":"$type.nav.color","fontFamily":"$type.nav.family","fontSize":"$type.nav.size","fontStyle":"$type.nav.style","fontWeight":"$type.nav.weight","letterSpacing":"$type.nav.tracking"}
+      ]},
+      {"id":"nav-item-active","type":"frame","alignItems":"center","clip":true,"cornerRadius":"$radius.md","fill":"$color.bg.sidebar-active","gap":"$space.3","height":"$size.nav-row","layout":"horizontal","name":"Nav / Item active","padding":[0,"$space.3",0,0],"reusable":true,"width":216,"x":400,"y":96,"children":[
+        {"id":"nav-item-active-bar","type":"rectangle","cornerRadius":"$radius.full","fill":"$color.brand","height":20,"width":3},
+        {"id":"nav-item-active-frame-1","type":"frame","alignItems":"center","gap":"$space.3","layout":"horizontal","children":[
+          {"id":"nav-item-active-icon","type":"icon","fill":"$color.brand","height":18,"icon":"library-big","library":"lucide","width":18},
+          {"id":"nav-item-active-label","type":"text","content":"Library","fill":"$type.nav-active.color","fontFamily":"$type.nav-active.family","fontSize":"$type.nav-active.size","fontStyle":"$type.nav-active.style","fontWeight":"$type.nav-active.weight","letterSpacing":"$type.nav-active.tracking"}
+        ]}
+      ]},
+      {"id":"view-item","type":"frame","alignItems":"center","cornerRadius":"$radius.md","gap":"$space.3","height":"$size.control","layout":"horizontal","name":"Nav / View","padding":[0,"$space.3"],"reusable":true,"width":216,"x":400,"y":152,"children":[
+        {"id":"view-item-icon","type":"icon","fill":"$color.text-muted","height":16,"icon":"bookmark","library":"lucide","width":16},
+        {"id":"view-item-label","type":"text","content":"Playing now","fill":"$color.text-sidebar","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+      ]},
+      {"id":"settings-nav-item","type":"frame","alignItems":"center","cornerRadius":"$radius.md","gap":"$space.2","height":"$size.control","layout":"horizontal","name":"Settings nav / Item","padding":[0,"$space.3"],"reusable":true,"width":200,"x":400,"y":200,"children":[
+        {"id":"settings-nav-item-icon","type":"icon","fill":"$color.text","height":16,"icon":"palette","library":"lucide","width":16},
+        {"id":"settings-nav-item-label","type":"text","content":"Appearance","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+      ]},
+      {"id":"settings-nav-item-active","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.control-hover","gap":"$space.2","height":"$size.control","layout":"horizontal","name":"Settings nav / Item active","padding":[0,"$space.3"],"reusable":true,"width":200,"x":400,"y":248,"children":[
+        {"id":"settings-nav-item-active-icon","type":"icon","fill":"$color.text","height":16,"icon":"settings","library":"lucide","width":16},
+        {"id":"settings-nav-item-active-label","type":"text","content":"General","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+      ]},
+      {"id":"tab","type":"frame","alignItems":"center","gap":"$space.2","layout":"vertical","name":"Tab","reusable":true,"x":400,"y":304,"children":[
+        {"id":"tab-label","type":"text","content":"Compatibility","fill":"$color.text-muted","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"},
+        {"id":"tab-indicator","type":"rectangle","fill":"#00000000","height":2,"width":"fill_container"}
+      ]},
+      {"id":"tab-active","type":"frame","alignItems":"center","gap":"$space.2","layout":"vertical","name":"Tab active","reusable":true,"x":520,"y":304,"children":[
+        {"id":"tab-active-label","type":"text","content":"About","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"},
+        {"id":"tab-active-indicator","type":"rectangle","cornerRadius":"$radius.full","fill":"$color.brand","height":2,"width":"fill_container"}
+      ]},
+      {"id":"segment","type":"frame","alignItems":"center","cornerRadius":"$radius.sm","gap":"$space.2","height":28,"layout":"horizontal","name":"Segment","padding":[0,"$space.3"],"reusable":true,"x":400,"y":360,"children":[
+        {"id":"segment-label","type":"text","content":"Installed","fill":"$color.text-sidebar","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+      ]},
+      {"id":"segment-active","type":"frame","alignItems":"center","cornerRadius":"$radius.sm","fill":"$color.bg.control-active","gap":"$space.2","height":28,"layout":"horizontal","name":"Segment active","padding":[0,"$space.3"],"reusable":true,"x":520,"y":360,"children":[
+        {"id":"segment-active-label","type":"text","content":"All","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+      ]},
+      {"id":"segmented-control","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.control","gap":"$space.1","layout":"horizontal","name":"Segmented control","padding":"$space.1","reusable":true,"stroke":"$color.border","strokeAlignment":"inner","strokeWidth":1,"x":760,"y":40,"children":[
+        {"id":"seg-1","type":"ref","ref":"segment-active"},
+        {"id":"seg-2","type":"ref","ref":"segment"},
+        {"id":"seg-3","type":"ref","descendants":{"segment-label":{"content":"Not installed"}},"ref":"segment"}
+      ]},
+      {"id":"game-card","type":"frame","gap":"$space.2","layout":"vertical","name":"Game card","reusable":true,"width":180,"x":760,"y":104,"children":[
+        {"id":"game-card-cover","type":"frame","clip":true,"cornerRadius":"$radius.sm","fill":"$color.bg.skeleton","height":270,"justifyContent":"space_between","layout":"vertical","padding":"$space.3","width":"fill_container","children":[
+          {"id":"game-card-cover-icon","type":"icon","fill":"$color.text-muted","height":16,"icon":"gamepad-2","library":"lucide","width":16},
+          {"id":"game-card-cover-title","type":"text","content":"Hades","fill":"$type.heading.color","fontFamily":"$type.heading.family","fontSize":"$type.heading.size","fontStyle":"$type.heading.style","fontWeight":"$type.heading.weight","letterSpacing":"$type.heading.tracking","textGrowth":"fixed-width","width":"fill_container"}
+        ]},
+        {"id":"game-card-frame-1","type":"frame","gap":"$space.1","layout":"vertical","width":"fill_container","children":[
+          {"id":"game-card-title","type":"text","content":"Hades","fill":"$type.body-strong.color","fontFamily":"$type.body-strong.family","fontSize":"$type.body-strong.size","fontStyle":"$type.body-strong.style","fontWeight":"$type.body-strong.weight","letterSpacing":"$type.body-strong.tracking"},
+          {"id":"game-card-status","type":"text","content":"Files missing","fill":"$type.caption.color","fontFamily":"$type.caption.family","fontSize":"$type.caption.size","fontStyle":"$type.caption.style","fontWeight":"$type.caption.weight","letterSpacing":"$type.caption.tracking"}
+        ]}
+      ]},
+      {"id":"setting-row","type":"frame","alignItems":"center","gap":"$space.4","layout":"horizontal","name":"Setting row","padding":["$space.4","$space.4"],"reusable":true,"stroke":"$color.border","strokeAlignment":"inner","strokeWidth":{"bottom":1,"left":0,"right":0,"top":0},"width":720,"x":1000,"y":104,"children":[
+        {"id":"setting-row-frame-1","type":"frame","gap":"$space.1","layout":"vertical","width":"fill_container","children":[
+          {"id":"setting-row-title","type":"text","content":"Check for game updates on startup","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"},
+          {"id":"setting-row-description","type":"text","content":"Minutes between background checks for game updates (5–1440).","fill":"$type.caption.color","fontFamily":"$type.caption.family","fontSize":"$type.caption.size","fontStyle":"$type.caption.style","fontWeight":"$type.caption.weight","letterSpacing":"$type.caption.tracking","textGrowth":"fixed-width","width":"fill_container"}
+        ]},
+        {"id":"setting-row-control","type":"frame","alignItems":"center","layout":"horizontal","slot":["toggle-on","toggle-off","select","input-path"],"children":[
+          {"id":"setting-row-toggle","type":"ref","ref":"toggle-on"}
+        ]}
+      ]},
+      {"id":"settings-card","type":"frame","gap":"$space.3","layout":"vertical","name":"Settings card","reusable":true,"width":720,"x":1000,"y":240,"children":[
+        {"id":"settings-card-label","type":"text","content":"UPDATES","fill":"$type.overline.color","fontFamily":"$type.overline.family","fontSize":"$type.overline.size","fontStyle":"$type.overline.style","fontWeight":"$type.overline.weight","letterSpacing":"$type.overline.tracking"},
+        {"id":"settings-card-body","type":"frame","clip":true,"cornerRadius":"$radius.lg","fill":"$color.bg.card","layout":"vertical","slot":["setting-row"],"stroke":"$color.border","strokeAlignment":"inner","strokeWidth":1,"width":"fill_container"}
+      ]},
+      {"id":"detail-row","type":"frame","alignItems":"center","layout":"horizontal","name":"Detail row","padding":["$space.3",0],"reusable":true,"stroke":"$color.border","strokeAlignment":"inner","strokeWidth":{"bottom":1,"left":0,"right":0,"top":0},"width":720,"x":1000,"y":460,"children":[
+        {"id":"detail-row-label","type":"text","content":"Playtime","fill":"$color.text-muted","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking","width":240},
+        {"id":"detail-row-value","type":"text","content":"Not played yet","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+      ]},
+      {"id":"card","type":"frame","cornerRadius":"$radius.lg","fill":"$color.bg.card","gap":"$space.4","layout":"vertical","name":"Card","padding":"$space.5","reusable":true,"stroke":"$color.border","strokeAlignment":"inner","strokeWidth":1,"width":720,"x":1000,"y":540,"children":[
+        {"id":"card-frame-1","type":"frame","alignItems":"center","justifyContent":"space_between","layout":"horizontal","width":"fill_container","children":[
+          {"id":"card-title","type":"text","content":"Play history","fill":"$type.heading.color","fontFamily":"$type.heading.family","fontSize":"$type.heading.size","fontStyle":"$type.heading.style","fontWeight":"$type.heading.weight","letterSpacing":"$type.heading.tracking"},
+          {"id":"card-actions","type":"frame","gap":"$space.2","layout":"horizontal","slot":["segmented-control","button-secondary"]}
+        ]},
+        {"id":"card-body","type":"frame","gap":"$space.2","layout":"vertical","slot":["detail-row"],"width":"fill_container"}
+      ]},
+      {"id":"title-bar","type":"frame","alignItems":"center","fill":"$color.bg.sidebar","height":32,"justifyContent":"space_between","layout":"horizontal","name":"Title bar","padding":[0,"$space.4"],"reusable":true,"stroke":"$color.border-subtle","strokeAlignment":"inner","strokeWidth":{"bottom":1,"left":0,"right":0,"top":0},"width":1280,"x":1760,"y":40,"children":[
+        {"id":"title-bar-frame-1","type":"frame","gap":"$space.4","layout":"horizontal","width":120,"children":[
+          {"id":"title-bar-icon-2","type":"icon","fill":"$color.text-muted","height":16,"icon":"chevron-left","library":"lucide","width":16},
+          {"id":"title-bar-icon-3","type":"icon","fill":"$color.text-muted","height":16,"icon":"chevron-right","library":"lucide","width":16}
+        ]},
+        {"id":"title-bar-search","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.page","gap":"$space.2","height":24,"justifyContent":"center","layout":"horizontal","stroke":"$color.border-input","strokeAlignment":"inner","strokeWidth":1,"width":352,"children":[
+          {"id":"title-bar-icon-4","type":"icon","fill":"$color.text","height":14,"icon":"search","library":"lucide","width":14},
+          {"id":"title-bar-text-5","type":"text","content":"Search games and commands…","fill":"$type.body.color","fontFamily":"$type.body.family","fontSize":"$type.body.size","fontStyle":"$type.body.style","fontWeight":"$type.body.weight","letterSpacing":"$type.body.tracking"}
+        ]},
+        {"id":"title-bar-frame-6","type":"frame","justifyContent":"end","layout":"horizontal","width":120,"children":[
+          {"id":"title-bar-icon-7","type":"icon","fill":"$color.text","height":16,"icon":"download","library":"lucide","width":16}
+        ]}
+      ]},
+      {"id":"sidebar","type":"frame","fill":"$color.bg.sidebar","gap":"$space.1","height":768,"layout":"vertical","name":"Sidebar","padding":["$space.5","$space.3","$space.3","$space.3"],"reusable":true,"stroke":"$color.border-subtle","strokeAlignment":"inner","strokeWidth":{"bottom":0,"left":0,"right":1,"top":0},"width":"$size.sidebar","x":1760,"y":104,"children":[
+        {"id":"sidebar-frame-1","type":"frame","alignItems":"center","gap":"$space.3","layout":"horizontal","padding":[0,"$space.1","$space.4","$space.1"],"children":[
+          {"id":"sidebar-frame-2","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.accent","height":32,"justifyContent":"center","layout":"horizontal","width":32,"children":[
+            {"id":"sidebar-icon-3","type":"icon","fill":"$color.brand","height":18,"icon":"flame","library":"lucide","width":18}
+          ]},
+          {"id":"sidebar-text-4","type":"text","content":"Irori","fill":"$type.heading.color","fontFamily":"$type.heading.family","fontSize":"$type.heading.size","fontStyle":"$type.heading.style","fontWeight":"$type.heading.weight","letterSpacing":"$type.heading.tracking"}
+        ]},
+        {"id":"sidebar-library","type":"ref","ref":"nav-item-active"},
+        {"id":"sidebar-downloads","type":"ref","descendants":{"nav-item-icon":{"icon":"download"},"nav-item-label":{"content":"Downloads"}},"ref":"nav-item"},
+        {"id":"sidebar-updates","type":"ref","descendants":{"nav-item-icon":{"icon":"refresh-cw"},"nav-item-label":{"content":"Updates"}},"ref":"nav-item"},
+        {"id":"sidebar-stores","type":"ref","descendants":{"nav-item-icon":{"icon":"store"},"nav-item-label":{"content":"Stores"}},"ref":"nav-item"},
+        {"id":"sidebar-stats","type":"ref","descendants":{"nav-item-icon":{"icon":"chart-column"},"nav-item-label":{"content":"Stats"}},"ref":"nav-item"},
+        {"id":"sidebar-frame-5","type":"frame","layout":"none","padding":["$space.5","$space.3","$space.2","$space.3"],"width":"fill_container","children":[
+          {"id":"sidebar-text-6","type":"text","content":"VIEWS","fill":"$type.overline.color","fontFamily":"$type.overline.family","fontSize":"$type.overline.size","fontStyle":"$type.overline.style","fontWeight":"$type.overline.weight","letterSpacing":"$type.overline.tracking"}
+        ]},
+        {"id":"sidebar-view-1","type":"ref","descendants":{"view-item-label":{"content":"Playing now"}},"ref":"view-item"},
+        {"id":"sidebar-view-2","type":"ref","descendants":{"view-item-label":{"content":"Backlog"}},"ref":"view-item"},
+        {"id":"sidebar-view-3","type":"ref","descendants":{"view-item-label":{"content":"Ready to play"}},"ref":"view-item"},
+        {"id":"sidebar-view-4","type":"ref","descendants":{"view-item-label":{"content":"Recently added"}},"ref":"view-item"},
+        {"id":"sidebar-frame-7","type":"frame","height":"fill_container","layout":"none","width":"fill_container"},
+        {"id":"sidebar-wine","type":"ref","descendants":{"nav-item-icon":{"icon":"wine"},"nav-item-label":{"content":"Wine & Proton"}},"ref":"nav-item"},
+        {"id":"sidebar-emulators","type":"ref","descendants":{"nav-item-icon":{"icon":"joystick"},"nav-item-label":{"content":"Emulators"}},"ref":"nav-item"},
+        {"id":"sidebar-accounts","type":"ref","descendants":{"nav-item-icon":{"icon":"circle-user"},"nav-item-label":{"content":"Accounts"}},"ref":"nav-item"},
+        {"id":"sidebar-settings","type":"ref","descendants":{"nav-item-icon":{"icon":"settings"},"nav-item-label":{"content":"Settings"}},"ref":"nav-item"},
+        {"id":"sidebar-frame-8","type":"frame","alignItems":"center","gap":"$space.2","layout":"horizontal","padding":["$space.3",0,0,0],"width":"fill_container","children":[
+          {"id":"sidebar-bigpicture","type":"frame","alignItems":"center","cornerRadius":"$radius.md","fill":"$color.bg.sidebar-active","gap":"$space.3","height":"$size.nav-row","layout":"horizontal","padding":[0,"$space.3"],"width":"fill_container","children":[
+            {"id":"sidebar-icon-9","type":"icon","fill":"$color.text","height":18,"icon":"gamepad-2","library":"lucide","width":18},
+            {"id":"sidebar-text-10","type":"text","content":"Big Picture","fill":"$type.nav-active.color","fontFamily":"$type.nav-active.family","fontSize":"$type.nav-active.size","fontStyle":"$type.nav-active.style","fontWeight":"$type.nav-active.weight","letterSpacing":"$type.nav-active.tracking"}
+          ]},
+          {"id":"sidebar-icon-11","type":"icon","fill":"$color.text-muted","height":18,"icon":"panel-left-close","library":"lucide","width":18}
+        ]}
+      ]}
+    ]}
+  ],
+  "blueline": {
+    "schemaVersion": 1,
+    "designSystem": {
+      "title": "Irori",
+      "overview": "Irori is a warm, dark-first game launcher. Surfaces are near-black warm browns (Irori Night) with a single ember-orange accent (color.brand) used sparingly: primary actions, the active nav indicator bar, active tab underline, toggles, sliders and focus. Everything else is neutral. Type is Manrope throughout; hierarchy comes from weight and size, with muted text (color.text-muted) for descriptions. Settings are grouped in rounded cards (radius.lg) with hairline dividers; controls are 32px tall with radius.md. Dark is the default mode; Light mirrors the Irori Day theme. Source: assets/themes/irori.json.",
+      "tokens": {
+        "color.bg.accent": {
+          "group": "Surfaces",
+          "description": "Soft brand-tinted highlight."
+        },
+        "color.bg.card": {
+          "group": "Surfaces",
+          "description": "Grouped settings cards, detail cards (muted background)."
+        },
+        "color.bg.control": {
+          "group": "Surfaces",
+          "description": "Secondary buttons, inputs, selects, segmented controls."
+        },
+        "color.bg.control-active": {
+          "group": "Surfaces",
+          "description": "Pressed control; selected segment."
+        },
+        "color.bg.control-hover": {
+          "group": "Surfaces"
+        },
+        "color.bg.hover": {
+          "group": "Surfaces",
+          "description": "Row hover overlay."
+        },
+        "color.bg.page": {
+          "group": "Surfaces",
+          "description": "Main content background."
+        },
+        "color.bg.panel": {
+          "group": "Surfaces",
+          "description": "Secondary panels such as the settings sub-navigation."
+        },
+        "color.bg.popover": {
+          "group": "Surfaces",
+          "description": "Menus, popovers, dialogs."
+        },
+        "color.bg.selected": {
+          "group": "Surfaces",
+          "description": "Selected list row."
+        },
+        "color.bg.sidebar": {
+          "group": "Surfaces",
+          "description": "App sidebar and title bar."
+        },
+        "color.bg.sidebar-active": {
+          "group": "Surfaces",
+          "description": "Selected sidebar / settings-nav row."
+        },
+        "color.bg.skeleton": {
+          "group": "Surfaces",
+          "description": "Game cover placeholders and loading skeletons."
+        },
+        "color.border": {
+          "group": "Borders",
+          "description": "Card outlines, row dividers."
+        },
+        "color.border-input": {
+          "group": "Borders",
+          "description": "Inputs, selects, outlined buttons."
+        },
+        "color.border-subtle": {
+          "group": "Borders",
+          "description": "Sidebar and title bar edges."
+        },
+        "color.brand": {
+          "group": "Brand",
+          "description": "Ember orange: primary buttons, active indicators, toggles, sliders, focus ring."
+        },
+        "color.brand-active": {
+          "group": "Brand"
+        },
+        "color.brand-hover": {
+          "group": "Brand"
+        },
+        "color.chart.1": {
+          "group": "Charts"
+        },
+        "color.chart.2": {
+          "group": "Charts"
+        },
+        "color.chart.3": {
+          "group": "Charts"
+        },
+        "color.chart.4": {
+          "group": "Charts"
+        },
+        "color.chart.5": {
+          "group": "Charts"
+        },
+        "color.chart.grid": {
+          "group": "Charts"
+        },
+        "color.danger": {
+          "group": "Status"
+        },
+        "color.info": {
+          "group": "Status"
+        },
+        "color.link": {
+          "group": "Text"
+        },
+        "color.on-brand": {
+          "group": "Brand",
+          "description": "Text and icons on color.brand."
+        },
+        "color.on-danger": {
+          "group": "Status"
+        },
+        "color.on-info": {
+          "group": "Status"
+        },
+        "color.on-success": {
+          "group": "Status"
+        },
+        "color.on-warning": {
+          "group": "Status"
+        },
+        "color.overlay": {
+          "group": "Surfaces",
+          "description": "Modal scrim."
+        },
+        "color.success": {
+          "group": "Status"
+        },
+        "color.switch-off": {
+          "group": "Brand",
+          "description": "Toggle track when off; slider track."
+        },
+        "color.text": {
+          "group": "Text",
+          "description": "Primary text."
+        },
+        "color.text-accent": {
+          "group": "Text",
+          "description": "Text on color.bg.accent."
+        },
+        "color.text-muted": {
+          "group": "Text",
+          "description": "Descriptions, captions, labels in detail tables."
+        },
+        "color.text-sidebar": {
+          "group": "Text",
+          "description": "Unselected sidebar rows."
+        },
+        "color.text-strong": {
+          "group": "Text",
+          "description": "Selected sidebar row."
+        },
+        "color.warning": {
+          "group": "Status",
+          "description": "Warning text, e.g. 'Game files weren't found'."
+        },
+        "font.sans": {
+          "group": "Type"
+        },
+        "radius.full": {
+          "group": "Radius",
+          "description": "Toggles, icon buttons, pills."
+        },
+        "radius.lg": {
+          "group": "Radius",
+          "description": "Cards (theme radius.lg)."
+        },
+        "radius.md": {
+          "group": "Radius",
+          "description": "Buttons, inputs, nav rows (theme radius)."
+        },
+        "radius.sm": {
+          "group": "Radius",
+          "description": "Badges, chips."
+        },
+        "size.control": {
+          "group": "Sizes",
+          "description": "Height of buttons, inputs, selects."
+        },
+        "size.nav-row": {
+          "group": "Sizes",
+          "description": "Height of a sidebar nav row."
+        },
+        "size.sidebar": {
+          "group": "Sizes",
+          "description": "App sidebar width."
+        },
+        "space.1": {
+          "group": "Spacing"
+        },
+        "space.10": {
+          "group": "Spacing"
+        },
+        "space.2": {
+          "group": "Spacing"
+        },
+        "space.3": {
+          "group": "Spacing"
+        },
+        "space.4": {
+          "group": "Spacing"
+        },
+        "space.5": {
+          "group": "Spacing"
+        },
+        "space.6": {
+          "group": "Spacing"
+        },
+        "space.8": {
+          "group": "Spacing"
+        },
+        "type.body-strong.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.body-strong.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.body-strong.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.body-strong.style": {
+          "group": "Typography"
+        },
+        "type.body-strong.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.body-strong.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        },
+        "type.body.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.body.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.body.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.body.style": {
+          "group": "Typography"
+        },
+        "type.body.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.body.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        },
+        "type.caption.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.caption.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.caption.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.caption.style": {
+          "group": "Typography"
+        },
+        "type.caption.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.caption.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        },
+        "type.display.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.display.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.display.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.display.style": {
+          "group": "Typography"
+        },
+        "type.display.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.display.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        },
+        "type.heading.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.heading.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.heading.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.heading.style": {
+          "group": "Typography"
+        },
+        "type.heading.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.heading.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        },
+        "type.nav-active.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.nav-active.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.nav-active.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.nav-active.style": {
+          "group": "Typography"
+        },
+        "type.nav-active.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.nav-active.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        },
+        "type.nav.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.nav.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.nav.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.nav.style": {
+          "group": "Typography"
+        },
+        "type.nav.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.nav.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        },
+        "type.overline.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.overline.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.overline.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.overline.style": {
+          "group": "Typography"
+        },
+        "type.overline.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.overline.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        },
+        "type.title.color": {
+          "group": "Typography",
+          "dtcgType": "color"
+        },
+        "type.title.family": {
+          "group": "Typography",
+          "dtcgType": "fontFamily"
+        },
+        "type.title.size": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.title.style": {
+          "group": "Typography"
+        },
+        "type.title.tracking": {
+          "group": "Typography",
+          "dtcgType": "dimension",
+          "unit": "px"
+        },
+        "type.title.weight": {
+          "group": "Typography",
+          "dtcgType": "fontWeight"
+        }
+      },
+      "textStyles": {
+        "body": {
+          "group": "Type",
+          "description": "Default UI text, setting labels, values.",
+          "properties": {
+            "fill": "$type.body.color",
+            "fontFamily": "$type.body.family",
+            "fontSize": "$type.body.size",
+            "fontStyle": "$type.body.style",
+            "fontWeight": "$type.body.weight",
+            "letterSpacing": "$type.body.tracking"
+          }
+        },
+        "body-strong": {
+          "group": "Type",
+          "description": "Game names under covers, emphasised values.",
+          "properties": {
+            "fill": "$type.body-strong.color",
+            "fontFamily": "$type.body-strong.family",
+            "fontSize": "$type.body-strong.size",
+            "fontStyle": "$type.body-strong.style",
+            "fontWeight": "$type.body-strong.weight",
+            "letterSpacing": "$type.body-strong.tracking"
+          }
+        },
+        "caption": {
+          "group": "Type",
+          "description": "Setting descriptions, subtitles, secondary info.",
+          "properties": {
+            "fill": "$type.caption.color",
+            "fontFamily": "$type.caption.family",
+            "fontSize": "$type.caption.size",
+            "fontStyle": "$type.caption.style",
+            "fontWeight": "$type.caption.weight",
+            "letterSpacing": "$type.caption.tracking"
+          }
+        },
+        "display": {
+          "group": "Type",
+          "description": "Game title on the detail page.",
+          "properties": {
+            "fill": "$type.display.color",
+            "fontFamily": "$type.display.family",
+            "fontSize": "$type.display.size",
+            "fontStyle": "$type.display.style",
+            "fontWeight": "$type.display.weight",
+            "letterSpacing": "$type.display.tracking"
+          }
+        },
+        "heading": {
+          "group": "Type",
+          "description": "Card titles (Play history, Details), brand wordmark.",
+          "properties": {
+            "fill": "$type.heading.color",
+            "fontFamily": "$type.heading.family",
+            "fontSize": "$type.heading.size",
+            "fontStyle": "$type.heading.style",
+            "fontWeight": "$type.heading.weight",
+            "letterSpacing": "$type.heading.tracking"
+          }
+        },
+        "nav": {
+          "group": "Type",
+          "description": "Main sidebar rows.",
+          "properties": {
+            "fill": "$type.nav.color",
+            "fontFamily": "$type.nav.family",
+            "fontSize": "$type.nav.size",
+            "fontStyle": "$type.nav.style",
+            "fontWeight": "$type.nav.weight",
+            "letterSpacing": "$type.nav.tracking"
+          }
+        },
+        "nav-active": {
+          "group": "Type",
+          "description": "Selected main sidebar row, Big Picture button.",
+          "properties": {
+            "fill": "$type.nav-active.color",
+            "fontFamily": "$type.nav-active.family",
+            "fontSize": "$type.nav-active.size",
+            "fontStyle": "$type.nav-active.style",
+            "fontWeight": "$type.nav-active.weight",
+            "letterSpacing": "$type.nav-active.tracking"
+          }
+        },
+        "overline": {
+          "group": "Type",
+          "description": "Uppercase section labels (VIEWS, LANGUAGE, GOG). Write content in capitals.",
+          "properties": {
+            "fill": "$type.overline.color",
+            "fontFamily": "$type.overline.family",
+            "fontSize": "$type.overline.size",
+            "fontStyle": "$type.overline.style",
+            "fontWeight": "$type.overline.weight",
+            "letterSpacing": "$type.overline.tracking"
+          }
+        },
+        "title": {
+          "group": "Type",
+          "description": "Page title (Library, General).",
+          "properties": {
+            "fill": "$type.title.color",
+            "fontFamily": "$type.title.family",
+            "fontSize": "$type.title.size",
+            "fontStyle": "$type.title.style",
+            "fontWeight": "$type.title.weight",
+            "letterSpacing": "$type.title.tracking"
+          }
+        }
+      },
+      "components": {
+        "badge": {
+          "group": "Data",
+          "description": "Small tag such as a platform name."
+        },
+        "button-icon": {
+          "group": "Actions",
+          "description": "Round icon-only action: favourite, refresh, more."
+        },
+        "button-primary": {
+          "group": "Actions",
+          "description": "The one main action on a screen (Locate files, Install, Play). Swap the icon or hide it."
+        },
+        "button-secondary": {
+          "group": "Actions",
+          "description": "Toolbar actions: Add game, Filters, Views, Sort, Select."
+        },
+        "card": {
+          "group": "Layout",
+          "description": "Rounded content card with heading, card-actions slot (e.g. segmented control) and card-body slot."
+        },
+        "detail-row": {
+          "group": "Data",
+          "description": "Label / value row for the game Details card."
+        },
+        "game-card": {
+          "group": "Library",
+          "description": "Library grid tile: cover (placeholder shows the title) with name and status below. Fill game-card-cover with an image fill for real art."
+        },
+        "input-path": {
+          "group": "Inputs",
+          "description": "Folder path field with browse icon, used in settings rows."
+        },
+        "input-search": {
+          "group": "Inputs",
+          "description": "Search fields (library, settings)."
+        },
+        "nav-item": {
+          "group": "Navigation",
+          "description": "Main sidebar row. Override nav-item-icon (icon) and nav-item-label."
+        },
+        "nav-item-active": {
+          "group": "Navigation",
+          "description": "Selected main sidebar row with the ember indicator bar."
+        },
+        "segment": {
+          "group": "Navigation",
+          "description": "Item inside a segmented control."
+        },
+        "segment-active": {
+          "group": "Navigation",
+          "description": "Selected item inside a segmented control."
+        },
+        "segmented-control": {
+          "group": "Navigation",
+          "description": "Filter pills such as All / Installed / Not installed, Grid / List / Focus, Timeline / Sessions / Journal."
+        },
+        "select": {
+          "group": "Inputs",
+          "description": "Dropdown select (Language)."
+        },
+        "setting-row": {
+          "group": "Settings",
+          "description": "One setting: title, description and a control in the setting-row-control slot (toggle, select, path input). Place inside settings-card-body; the last row's bottom border may be hidden."
+        },
+        "settings-card": {
+          "group": "Settings",
+          "description": "Uppercase section label plus a rounded card; fill the settings-card-body slot with setting-row instances."
+        },
+        "settings-nav-item": {
+          "group": "Navigation",
+          "description": "Settings sub-navigation row."
+        },
+        "settings-nav-item-active": {
+          "group": "Navigation",
+          "description": "Selected settings sub-navigation row."
+        },
+        "sidebar": {
+          "group": "Layout",
+          "description": "App sidebar. Move the active state by swapping nav-item / nav-item-active instances' overrides."
+        },
+        "tab": {
+          "group": "Navigation",
+          "description": "Underline tab (game page About / Compatibility / Extras / Mods)."
+        },
+        "tab-active": {
+          "group": "Navigation",
+          "description": "Selected underline tab."
+        },
+        "title-bar": {
+          "group": "Layout",
+          "description": "Window title bar with back/forward, command search and downloads. 1280 wide; stretch to the window."
+        },
+        "toggle-off": {
+          "group": "Inputs",
+          "description": "Switch, off."
+        },
+        "toggle-on": {
+          "group": "Inputs",
+          "description": "Switch, on."
+        },
+        "view-item": {
+          "group": "Navigation",
+          "description": "Saved view under the VIEWS heading in the sidebar."
+        }
+      }
+    }
+  }
+}

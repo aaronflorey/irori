@@ -178,6 +178,7 @@ fn route_of(link: &str) -> Route {
     match (cli.open, cli.route) {
         (Some(id), _) => Route::Game(id),
         (None, Some(route)) => route,
+        (None, None) if cli.big_picture => Route::BigPicture,
         (None, None) => panic!("{link:?} opens no screen"),
     }
 }

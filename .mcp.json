@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "blueline-cli": {
+      "command": "blueline-cli",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}

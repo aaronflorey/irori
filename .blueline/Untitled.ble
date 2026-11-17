@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "imports": {
+    "Irori": "Irori.lib.ble"
+  },
+  "children": [
+    {"id":"image-1","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/0730829d2a43046d64441a6d898839b13099adf2b5cb500ec1f29a766e0a5114.png"}],"height":500,"name":"accounts-dark-en.png","width":800,"x":0,"y":0},
+    {"id":"image-2","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/539df34e8bb9e27f7ab44fe7ee59e096c1a5868056188bba712257c24c5c0d1a.png"}],"height":500,"name":"bigpicture-dark-en.png","width":800,"x":880,"y":0},
+    {"id":"image-3","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/6e4f5acec80ac7486389d2e72cbccf7a283c9d787d0206bd5a6d0eee2509e683.png"}],"height":500,"name":"downloads-dark-en.png","width":800,"x":1760,"y":0},
+    {"id":"image-4","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/900c23b877ef09f1a3e1d01b1749658b709d6dc8de264b747c4f24d4eeded3fb.png"}],"height":500,"name":"emulators-dark-en.png","width":800,"x":2640,"y":0},
+    {"id":"image-5","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/fbab2457a383794acef37bcd87ee88f86d0149f874ab124d347b08ea9217a7eb.png"}],"height":500,"name":"game-gog-3-dark-en.png","width":800,"x":3520,"y":0},
+    {"id":"image-6","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/7f9400e7821cda8b2086a0a6743966a2bb901bf2fd29dddb1d0b4f5ff66830d9.png"}],"height":500,"name":"library-dark-en.png","width":800,"x":4400,"y":0},
+    {"id":"image-7","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/650267166a048a993b05cc6ab9f9e0d297077ee23ada3af395e3ffcaf6fabece.png"}],"height":500,"name":"settings-about-dark-en.png","width":800,"x":5280,"y":0},
+    {"id":"image-8","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/09309804b6dbdefee7650291c96f16c9388d5ee3ff748d86c316b8b7d95053f7.png"}],"height":500,"name":"settings-advanced-dark-en.png","width":800,"x":6160,"y":0},
+    {"id":"image-9","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/eee55927bf3f269b4a67413eaeb4ca814feb2e1b0701d0597b40cfe65a83f94d.png"}],"height":500,"name":"settings-appearance-dark-en.png","width":800,"x":7040,"y":0},
+    {"id":"image-10","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/a90927c925cc62eb1079bcbeffa6431956811befad931d79bec0afbcf1c9521f.png"}],"height":500,"name":"settings-backup-dark-en.png","width":800,"x":7920,"y":0},
+    {"id":"image-11","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/a57f3c140cbccf2c64ad0701ee0be7cdce99a82e7c19ff2331d4b00c1270ac7f.png"}],"height":500,"name":"settings-game-defaults-dark-en.png","width":800,"x":8800,"y":0},
+    {"id":"image-12","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/215184bc6fbe359760f1a14494e3e860e55238a7d7c49c1e49caa0965e11d5ad.png"}],"height":500,"name":"settings-general-dark-en.png","width":800,"x":9680,"y":0},
+    {"id":"image-13","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/6a72e55cce16427e45fd7c716588edb2df58e14bb607bd8243c0332c83cc6f6a.png"}],"height":500,"name":"settings-logs-dark-en.png","width":800,"x":10560,"y":0},
+    {"id":"image-14","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/723b12a562ec3cbd20c6800a4a9107cd711e9ec9ca26d89b19387099e96ede5f.png"}],"height":500,"name":"settings-saves-dark-en.png","width":800,"x":11440,"y":0},
+    {"id":"image-15","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/9acc32625152ef05e6e43e94157fcde4f4a8ae5fd06abbb516bd7def8741ec3b.png"}],"height":500,"name":"settings-storage-dark-en.png","width":800,"x":12320,"y":0},
+    {"id":"image-16","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/6e51574f150d78524d9a06f57045154f19027cd87c2f9d993b34d72419747035.png"}],"height":500,"name":"settings-system-dark-en.png","width":800,"x":13200,"y":0},
+    {"id":"image-17","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/3e426184129262b13fa7730f5f6f5a1da11e2cb2d24f1be2d8b375fe3cde4f30.png"}],"height":500,"name":"stats-dark-en.png","width":800,"x":14080,"y":0},
+    {"id":"image-18","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/d409cf2a3457fb2135ed40f9c1de0a49b16d8429460b4734749b50a6c1035468.png"}],"height":500,"name":"stats-year-dark-en.png","width":800,"x":14960,"y":0},
+    {"id":"image-19","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/91e06d86e840fc37f363a74366401008e9c7925e73850a0cab3a24e2a70117c0.png"}],"height":500,"name":"stores-dark-en.png","width":800,"x":15840,"y":0},
+    {"id":"image-20","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/c60c431b58afc850721351b6895d809a4ea36342532dbe50434f55da646a63fc.png"}],"height":500,"name":"updates-dark-en.png","width":800,"x":16720,"y":0},
+    {"id":"image-21","type":"rectangle","fill":[{"mode":"cover","type":"image","url":"assets/375523d38635f8dff176b1b338f4151bc04f82140693c0618f02d9969b96a2c1.png"}],"height":500,"name":"wine-dark-en.png","width":800,"x":17600,"y":0}
+  ],
+  "blueline": {
+    "schemaVersion": 1,
+    "designSystemAlias": "Irori"
+  }
+}
